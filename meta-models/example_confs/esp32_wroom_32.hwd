@@ -1,0 +1,139 @@
+// RIOT Configuration for ESP32-WROOM-32 boards
+
+board:
+    name: esp32_wroom_32
+    vcc: 3.3
+    operating_voltage: 3.3
+    timers: 1
+    memory:
+	flash: 4 mb
+    cpu:
+	cpu_family: ESP32
+	max_freq: 240 mhz
+	fpu: false
+    network:
+	- wifi:
+	    name: wifi_1
+	    freq: 2.5 ghz
+	bluetooth:
+	version: 4.2
+    pins:
+	- power:
+	    name: power_3v3
+	    number: 1
+	    type: 3v3
+	- io_pin: ->
+	    name: en_rst
+	    number: 2
+	- io_pin: -> gpio, adc
+	    name: svp
+	    number: 3
+	- io_pin: -> gpio, adc
+	    name: svn
+	    number: 4
+	- io_pin: -> gpio, adc
+	    name: p_34
+	    number: 5
+	- io_pin: -> gpio, adc
+	    name: p_35
+	    number: 6
+	- io_pin: -> gpio, pwm-1, adc 
+	    name: p_32
+	    number: 7
+	- io_pin: -> gpio, pwm-1, adc
+	    name: p_33
+	    number: 8
+	- io_pin: -> gpio, dac, adc
+	    name: p_25
+	    number: 9
+	- io_pin: -> gpio, dac, adc
+	    name: p_26
+	    number: 10
+	- io_pin: -> gpio, pwm-1, adc
+	    name: p_27
+	    number: 11
+	- io_pin: -> gpio, sck-1, adc
+	    name: p_14
+	    number: 12
+	- io_pin: -> gpio, miso-1, adc
+	    name: p_12
+	    number: 13
+	- power:
+	    name: gnd_1
+	    number: 14
+	    type: gnd
+	- io_pin: -> gpio, mosi-1, adc
+	    name: p_13
+	    number: 15
+	- io_pin: -> gpio, rx-1
+	    name: p_9
+	    number: 16
+	- io_pin: -> gpio, tx-1
+	    name: p_10
+	    number: 17
+	- io_pin: -> gpio
+	    name: p_11
+	    number: 18
+	- power:
+	    name: power_5v
+	    number: 19
+	    type: 5v
+	- power:
+	    name: gnd_2
+	    number: 20
+	    type: gnd
+	- io_pin: -> gpio, mosi-0
+	    name: p_23
+	    number: 21
+	- io_pin: -> gpio, scl-0
+	    name: p_22
+	    number: 22
+	- io_pin: -> gpio, tx-0
+	    name: p_1
+	    number: 23
+	- io_pin: -> gpio, rx-0
+	    name: p_3
+	    number: 24
+	- io_pin: -> gpio, sda-0
+	    name: p_21
+	    number: 25
+	- power:
+	    name: gnd_3
+	    number: 26
+	    type: gnd
+	- io_pin: -> gpio, miso-0
+	    name: p_19
+	    number: 27
+	- io_pin: -> gpio, sck-0
+	    name: p_18
+	    number: 28
+	- io_pin: -> gpio, cs-0
+	    name: p_5
+	    number: 29
+	- io_pin: -> gpio, pwm-0
+	    name: p_17
+	    number: 30
+	- io_pin: -> gpio, pwm-0
+	    name: p_16
+	    number: 31
+	- io_pin: -> gpio, pwm-0, adc
+	    name: p_4
+	    number: 32
+	- io_pin: -> gpio, pwm-0, adc
+	    name: p_0
+	    number: 33
+	- io_pin: -> gpio, pwm-0, adc
+	    name: p_2
+	    number: 34
+	- io_pin: -> gpio, cs-1, adc
+	    name: p_15
+	    number: 35
+	- io_pin: -> gpio
+	    name: p_8
+	    number: 36
+	- io_pin: -> gpio
+	    name: p_7
+	    number: 37
+	- io_pin: -> gpio
+	    name: p_6
+	    number: 38

@@ -1,0 +1,232 @@
+//Device
+Device:
+    Board | Peripheral
+;
+
+// Board meta-model
+Board:
+    'board:'
+	((memory=MEMORY)
+	 (timers=TIMERS)
+	 (cpu=CPU)
+	 (pins=PINS)
+	 (vcc=VCC) 
+	 (name=BOARD_NAME)
+	 (op_volt=OP_VOLT)
+	 (network=NETWORK)?
+	 (bluetooth=BLUETOOTH)?)#
+;
+
+Peripheral:
+    'peripheral:'
+	 ((type=PERIPHERAL_TYPE)
+	 (pins=PINS)
+	 (vcc=VCC) 
+	 (name=PERIPHERAL_NAME)
+	 (op_volt=OP_VOLT)
+	 (network=NETWORK)?
+	 (bluetooth=BLUETOOTH)?)#
+;
+
+BOARD_NAME:
+   name="name" ":" val=BOARD_NAMES
+;
+
+BOARD_NAMES:
+	"esp32_wroom_32" | "wemos_d1_mini"
+;
+
+PERIPHERAL_NAME:
+   name="name" ":" val=PERIPHERAL_NAMES
+;
+
+PERIPHERAL_NAMES:
+	"srf04" | "bme680"
+;
+
+PERIPHERAL_TYPE:
+	name="type" ":" val=PER_TYPES
+;
+
+PER_TYPES:
+	"sensor" | "actuator"
+;
+
+PINS:
+	name="pins" ":" val*=PIN
+;
+
+PIN:
+	POWER_PIN | IO_PIN | INPUT_PIN | OUTPUT_PIN
+;
+
+POWER_PIN:
+	"- power:"
+	(("name:" name=ID)
+	 ("number:" number=INT)
+	 ("type:" type=POWER_TYPE))#
+;
+
+POWER_TYPE:
+	("gnd" | "5v" | "3v3")
+;
+
+IO_PIN:
+	"- io_pin:" "->" funcs*=PIN_FUNC[","]
+	(("name:" name=ID)
+	 ("number:" number=INT)
+	 ("vmax:" vmax=NUMBER)?)#
+;
+
+PIN_FUNC:
+	GPIO | I2C | SPI | UART | PWM | ADC | DAC
+;
+
+GPIO:
+	type="gpio"
+;
+
+I2C:
+	type=I2C_TYPE "-" bus=INT
+;
+
+I2C_TYPE:
+	"sda" | "scl"
+;
+
+SPI:
+	type=SPI_TYPE "-" bus=INT
+;
+
+SPI_TYPE:
+	"mosi" | "miso" | "sck" | "cs"
+;
+
+UART:
+	type=UART_TYPE "-" bus=INT
+;
+
+UART_TYPE:
+	"tx" | "rx"
+;
+
+PWM:
+	type="pwm-" interface=INT 
+;
+
+ADC:
+	type="adc"
+;
+
+DAC:
+	type="dac"
+;
+
+INPUT_PIN:
+	"- input_pin:"
+	(("name:" name=ID)
+	 ("number:" number=INT)
+	 ("vmax:" vmax=NUMBER)?)#
+;
+
+OUTPUT_PIN:
+	"- output_pin:"
+	(("name:" name=ID)
+	 ("number:" number=INT)
+	 ("vmax:" vmax=NUMBER)?)#
+;
+
+TIMERS:
+	name="timers" ":" val=INT
+;
+
+CPU:
+	name="cpu" ":" val=CPU_TYPE
+;
+
+CPU_TYPE:
+	(("cpu_family:" cpu_family=CPU_FAMILY)
+	 ("max_freq:" max_freq=NUMBER unit=FREQ_UNIT)
+	 ("fpu:" fpu=BOOL))#
+;
+
+CPU_FAMILY:
+	( "ESP32" | "ESP8266")
+;
+
+MEMORY:
+    name="memory" ":" val=MEM_TYPE
+;
+
+MEM_TYPE:
+    (
+    (("ram:" ram=MEM_VALUE)
+    ("rom:" rom=MEM_VALUE)?
+    ("flash:" flash=MEM_VALUE)?)# |
+    (("ram:" ram=MEM_VALUE)?
+    ("rom:" rom=MEM_VALUE)?
+    ("flash:" flash=MEM_VALUE))# |
+    (("ram:" ram=MEM_VALUE)?
+    ("rom:" rom=MEM_VALUE)
+    ("flash:" flash=MEM_VALUE)?)#
+    )
+;
+
+MEM_VALUE:
+    val=NUMBER unit=UNITS?
+;
+
+UNITS:
+    ("kb" | "mb" | "gb" | "b")
+;
+
+VCC:
+    name="vcc" ":" val=FLOAT
+;
+
+OP_VOLT:
+   name="operating_voltage" ":" val=FLOAT
+;
+
+NETWORK:
+    name="network" ":"
+    val*=NETWORK_TYPE
+;
+
+NETWORK_TYPE:
+    (WIFI | ETHERNET)
+;
+
+WIFI:
+	"- wifi:" 
+	(("name:" name=ID)
+	 ("freq:" freq*=NUMBER[","] unit=FREQ_UNIT)?)#
+;
+
+FREQ_UNIT:
+	"ghz" | "mhz" | "hz"
+;
+ETHERNET:
+	"- ethernet:"
+	"name:" name=ID
+;
+
+BLUETOOTH:
+	name="bluetooth" ":" val=BLUETOOTH_VAL
+;
+
+BLUETOOTH_VAL:
+	"version:" version=NUMBER
+;
+
+ATTRIBUTE:
+    name=ID ":" val=VAL_TYPE
+;
+
+VAL_TYPE:
+    NUMBER | ID
+;
+
+Comment:
+  /\/\/.*$/
+;

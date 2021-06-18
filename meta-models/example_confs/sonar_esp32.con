@@ -1,0 +1,19 @@
+include srf04
+include esp32_wroom_32
+
+connection:
+    name: sonar_esp32
+    board: esp32_wroom_32
+    peripheral: srf04
+    peripheral_impl: srf04_esp32_GPIO
+    power_connections:
+	- gnd_1 -- gnd
+	- power_5v -- vcc 
+    hw_connections:
+	- gpio: p_4 -- echo
+	- gpio: p_0 -- trigger
+    communication_endpoint:
+	topic: sonar.distance
+	port: 1885
+	msg: Distance
+	frequency: 10 hz
