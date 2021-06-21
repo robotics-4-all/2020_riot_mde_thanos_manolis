@@ -1,4 +1,5 @@
-// Grammar for a system. A system can have a board and multiple devices.
+// Grammar for a system. A system consists a board (ESP32/ESP8266) 
+// and one or more peripherals (sensors/actuators).
 
 SYSTEM:
 	includes*=INCLUDE

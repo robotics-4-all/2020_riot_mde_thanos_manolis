@@ -29,8 +29,12 @@ def main():
     template1 = env.get_template(
         'templates/node.c.tmpl')
     
-    # Load Makefile template
+    # Load C header template
     template2 = env.get_template(
+        'templates/mqtt_funcs.h.tmpl')
+
+    # Load Makefile template
+    template3 = env.get_template(
         'templates/Makefile.tmpl')
 
     """ Parse info from device meta-model """
@@ -83,8 +87,9 @@ def main():
     mqtt_port = connection_model.connections[0].com_endpoint.port
     echo_pin_tmp = (connection_model.connections[0].hw_conns[0].board_int).split("_",1)[1]
     trigger_pin_tmp = (connection_model.connections[0].hw_conns[1].board_int).split("_",1)[1]
+    system_name = connection_model.connections[0].name
+    peripheral_name_tmp = connection_model.connections[0].peripheral.device
     module_tmp = connection_model.includes[0].val
-    system_name= connection_model.connections[0].name
 
     # C template
     rt = template1.render(port=mqtt_port,
@@ -92,15 +97,21 @@ def main():
                          trigger_pin=trigger_pin_tmp,
                          echo_port=1,
                          echo_pin=echo_pin_tmp,
-                         module = module_tmp)
-    ofh = codecs.open("src/output_node.c", "w", encoding="utf-8")
+                         perihperal_name=peripheral_name_tmp)
+    ofh = codecs.open("codegen/src/output_node.c", "w", encoding="utf-8")
+    ofh.write(rt)
+    ofh.close()
+
+    # C header template
+    rt = template2.render(port=mqtt_port)
+    ofh = codecs.open("codegen/inc/mqtt_funcs.h", "w", encoding="utf-8")
     ofh.write(rt)
     ofh.close()
 
     # Makefile template
-    rt = template2.render(app_name=system_name,
-                          module=module_tmp)
-    ofh = codecs.open("src/Makefile", "w", encoding="utf-8")
+    rt = template3.render(app_name=system_name,
+                          module=peripheral_name_tmp)
+    ofh = codecs.open("codegen/Makefile", "w", encoding="utf-8")
     ofh.write(rt)
     ofh.close()
 
