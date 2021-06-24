@@ -78,6 +78,7 @@ UART:
 
 COM_ENDPOINT:
 	(("topic:" topic=NEW_ID)
+	 ("address:" addr=ADDRESS_ID)
 	 ("port:" port=INT)
 	 ("msg:" msg=MSG_ENTRIES)
      ("frequency:" freq=FREQUENCY)?)#
@@ -85,6 +86,10 @@ COM_ENDPOINT:
 
 NEW_ID:
 	/(.*?)\n/
+;
+
+ADDRESS_ID:
+	/([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/
 ;
 
 MSG_ENTRIES:

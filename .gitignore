@@ -2,3 +2,15 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Object files
+*.o
+# Target files
+*.elf
+# Built binaries
+*bin
+
+# DOT files
+*.dot
+# PNG files
+*.png

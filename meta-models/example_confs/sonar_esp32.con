@@ -14,6 +14,7 @@ connection:
 	- gpio: p_0 -- trigger
     communication_endpoint:
 	topic: sonar.distance
+	address: 2a02:587:540c:8366:2e33:7aff:fefb:d97f
 	port: 1885
 	msg: Distance
 	frequency: 10 hz
