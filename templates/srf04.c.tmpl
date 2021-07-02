@@ -1,7 +1,7 @@
 /*
  * Function that initializes srf04 sensor
  */
-static srf04_t init_sensor(void)
+static int init_sensor(srf04_t *dev)
 {
     /* Fix port parameter for digital sensor */
     srf04_params_t my_params;
@@ -11,13 +11,7 @@ static srf04_t init_sensor(void)
     my_params.echo = GPIO_PIN( 0, {{args["echo_pin"]}} );
 
     /* Initialize gpio and interrupt */
-    srf04_t dev;
-    if (srf04_init(&dev, &my_params) == SRF04_OK)
-        printf("SRF04 sensor connected\n");
-    else
-        printf("Failed to connect to SRF04 sensor\n");
-
-    return dev;
+    return srf04_init(dev, &my_params);
 }
 
 /*

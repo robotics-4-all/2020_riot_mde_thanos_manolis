@@ -37,12 +37,8 @@ static int gen_sensor_values(void)
 {%- endif %}
 
 /*
- * Function that starts the procedure. Every five seconds it      
- * gets a new sensor measurement and publishes it to topic    
- * 'sensor/{{ peripheral_name }}_{{ id }}'. The number of messages to be         
- * publshed is also specified.                   
- *                                                     
- * - arg 1     Number of messages to be published
+ * Function that starts the procedure. It gets a new sensor measurement 
+ * with frequency {{ frequency }} Hz and publishes it to topic 'sensor/{{ peripheral_name }}_{{ id }}'.
  */
 static int start(void)
 {
@@ -56,9 +52,16 @@ static int start(void)
         printf("Couldn't connect to broker. The measurements will just be printed instead.\n");
 
         /* Initialize sensor */
-        {{ peripheral_name }}_t dev = init_sensor();
+        {{ peripheral_name }}_t dev;
+        if (init_sensor(&dev) == 0)
+            printf("{{ peripheral_name }} sensor connected\n");
+        else
+        {
+            printf("Failed to connect to {{ peripheral_name }} sensor\n");
+            return 1;
+        }
 
-        /* Print sensor output every 1/{{ frequency }} seconds */
+        /* Print sensor output with frequency {{ frequency }} Hz */
         while(true)
         {
             /* Get a sensor measurement */
@@ -71,9 +74,16 @@ static int start(void)
     else
     {
         /* Initialize sensor */
-        {{ peripheral_name }}_t dev = init_sensor();
+        {{ peripheral_name }}_t dev;
+        if (init_sensor(&dev) == 0)
+            printf("{{ peripheral_name }} sensor connected\n");
+        else
+        {
+            printf("Failed to connect to {{ peripheral_name }} sensor\n");
+            return 1;
+        }
 
-        /* Publish sensor output every 1/{{ frequency }} seconds */
+        /* Print sensor output with frequency {{ frequency }} Hz */
         while(true)
         {
             /* Message to be published */

@@ -1,7 +1,7 @@
 /*
  * Function that initializes bme680 sensor
  */
-static bme680_t init_sensor(void)
+static int init_sensor(bme680_t *dev)
 {
     /* Fix port parameter for digital sensor */
     bme680_params_t my_params;
@@ -19,13 +19,7 @@ static bme680_t init_sensor(void)
     // my_params.intf.i2c.addr  = BME680_PARAM_I2C_ADDR;
 
     /* Initialize BME680 sensor */
-    bme680_t dev;
-    if ( bme680_init(&dev, &my_params) ==  0)
-        printf("BME680 sensor connected\n");
-    else
-        printf("Failed to connect to BME680 sensor\n");
-
-    return dev;
+    return bme680_init(dev, &my_params);
 }
 
 /*
