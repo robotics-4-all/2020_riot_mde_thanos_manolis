@@ -12,10 +12,7 @@
 #include "{{ peripheral_name }}_params.h"
 #include "xtimer.h"
 
-
 {% include 'templates/mqtt_con.c.tmpl' %}
-
-
 {% if peripheral_name == "srf04" -%}
 {% include 'templates/srf04.c.tmpl' %}
 {% elif peripheral_name == "bme680" -%}
@@ -28,8 +25,8 @@ static int gen_sensor_values(void)
 {
     ; // You need to fill this function
 }
-{% endif -%}
 
+{% endif -%}
 
 /*
  * Function that starts the procedure. Every five seconds it      
@@ -41,7 +38,6 @@ static int gen_sensor_values(void)
  * - arg 2     ID of node that publishes         
  * - arg 3     Number of messages to be published
  */
-
 static int start(char *addr, int id, int num_of_msgs)
 {
     /* Name of the topic */

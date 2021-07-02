@@ -11,6 +11,7 @@ import codecs
 import jinja2
 
 from os.path import join, dirname
+from pathlib import Path
 import os
 import sys
 import pydot
@@ -71,9 +72,6 @@ def main():
         'meta-models/dotexport/' + connection_conf + '.dot')
     graph.write_png('meta-models/dotexport/' + connection_conf + '.png')
 
-    print(connection_model.connections[0].board.device)
-    print(connection_model.connections[0].peripheral.device)
-
     """ Produce source code from templates """
 
     # Load C template
@@ -84,41 +82,46 @@ def main():
     template2 = env.get_template(
         'templates/Makefile.tmpl')
     
-    address_tmp = connection_model.connections[0].com_endpoint.addr
-    id_tmp = 1
-    num_of_msgs_tmp = 10
-    mqtt_port = connection_model.connections[0].com_endpoint.port
-    system_name = connection_model.connections[0].name
-    peripheral_name_tmp = connection_model.connections[0].peripheral.device
+    for i in range(len(connection_model.connections)):
 
-    # Hardware connection args
-    args_tmp = {}
+        # Parse info from the created models
+        address_tmp = connection_model.connections[i].com_endpoint.addr
+        id_tmp = i
+        num_of_msgs_tmp = 10
+        mqtt_port = connection_model.connections[i].com_endpoint.port
+        connection_name_tmp = connection_model.connections[i].name
+        peripheral_name_tmp = connection_model.connections[i].peripheral.device
 
-    for hw_conn in connection_model.connections:
-        if (connection_model.connections[0].hw_conns[0].type == 'gpio'):
-            args_tmp["echo_pin"] = (connection_model.connections[0].hw_conns[0].board_int).split("_",1)[1]
-            args_tmp["trigger_pin"] = (connection_model.connections[0].hw_conns[1].board_int).split("_",1)[1]
-        elif (connection_model.connections[0].hw_conns[0].type == 'i2c'):
-            args_tmp["slave_address"] = '0x76'
+        # Hardware connection args
+        args_tmp = {}
+
+        if (connection_model.connections[i].hw_conns[0].type == 'gpio'):
+            args_tmp["echo_pin"] = (connection_model.connections[i].hw_conns[0].board_int).split("_",1)[1]
+            args_tmp["trigger_pin"] = (connection_model.connections[i].hw_conns[1].board_int).split("_",1)[1]
+        elif (connection_model.connections[i].hw_conns[0].type == 'i2c'):
+            args_tmp["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
             peripheral_name_tmp = peripheral_name_tmp + '_i2c'
 
-    # C template
-    rt = template1.render(address=address_tmp,
-                          id=id_tmp,
-                          num_of_msgs=num_of_msgs_tmp,
-                          port=mqtt_port,
-                          peripheral_name=peripheral_name_tmp,
-                          args=args_tmp)
-    ofh = codecs.open("codegen/output_node.c", "w", encoding="utf-8")
-    ofh.write(rt)
-    ofh.close()
+        # Create folder for this connection's source code
+        Path("codegen/" + connection_name_tmp).mkdir(parents=True, exist_ok=True)
 
-    # Makefile template
-    rt = template2.render(app_name=system_name,
-                          module=peripheral_name_tmp)
-    ofh = codecs.open("codegen/Makefile", "w", encoding="utf-8")
-    ofh.write(rt)
-    ofh.close()
+        # C template
+        rt = template1.render(address=address_tmp,
+                              id=id_tmp,
+                              num_of_msgs=num_of_msgs_tmp,
+                              port=mqtt_port,
+                              peripheral_name=peripheral_name_tmp,
+                              args=args_tmp)        
+        ofh = codecs.open("codegen/" + connection_name_tmp + "/" + peripheral_name_tmp + ".c", "w", encoding="utf-8")
+        ofh.write(rt)
+        ofh.close()
+
+        # Makefile template
+        rt = template2.render(connection_name=connection_name_tmp,
+                              module=peripheral_name_tmp)
+        ofh = codecs.open("codegen/" + connection_name_tmp + "/Makefile", "w", encoding="utf-8")
+        ofh.write(rt)
+        ofh.close()
 
 
 if __name__ == '__main__':
