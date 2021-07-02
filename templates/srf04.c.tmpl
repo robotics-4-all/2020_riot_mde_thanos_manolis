@@ -1,0 +1,40 @@
+/*
+ * Function that triggers and returns srf04 sensor measurement
+ */
+static int gen_sensor_values(void)
+{
+    /* Fix port parameter for digital sensor */
+    srf04_params_t my_params;
+
+    /* PINS */
+    my_params.trigger = GPIO_PIN( 0, {{args["trigger_pin"]}} );
+    my_params.echo = GPIO_PIN( 0, {{args["echo_pin"]}} );
+
+    /* Initialize gpio and interrupt */
+    srf04_t dev;
+    if (srf04_init(&dev, &my_params) == SRF04_OK)
+        printf("SRF04 sensor connected\n");
+    else
+    {
+        printf("Failed to connect to SRF04 sensor\n");
+        return 1;
+    }
+
+    int dist = srf04_get_distance(&dev);
+
+    if (dist == SRF04_ERR_INVALID)
+    {
+        printf("Error: No valid measurement is available\n");
+        return SRF04_ERR_INVALID;
+    }
+    else if (dist == SRF04_ERR_MEASURING)
+    {
+        printf("Error: measurement is in progress\n");
+        return SRF04_ERR_MEASURING;
+    }
+    else
+    {
+        printf("SRF04 values - dist: %.1f cm\n", (float)dist / 10);
+        return dist;
+    }
+}

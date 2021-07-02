@@ -1,20 +1,20 @@
-include srf04
+include bme680
 include esp32_wroom_32
 
 connection:
-    name: sonar_esp32
+    name: bme680_esp32
     board: esp32_wroom_32
-    peripheral: srf04
-    peripheral_impl: srf04_esp32_GPIO
+    peripheral: bme680
+    peripheral_impl: bme680_esp32_i2c
     power_connections:
 	- gnd_1 -- gnd
 	- power_5v -- vcc 
     hw_connections:
-	- gpio: p_14 -- echo
-	- gpio: p_13 -- trigger
+	- i2c: i2c_1 -- i2c_0
+		slave_address: 0x76
     communication_endpoint:
-	topic: sonar.distance
+	topic: bme.data
 	address: 2a02:587:5401:b0f4:2e33:7aff:fefb:d97f
 	port: 1885
-	msg: Distance
+	msg: Env
 	frequency: 10 hz

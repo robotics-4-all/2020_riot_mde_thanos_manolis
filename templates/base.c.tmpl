@@ -1,0 +1,99 @@
+/*
+ * Publisher node
+ */
+
+#include <time.h>
+#include "shell.h"
+#include "msg.h"
+
+/* Peripheral includes */
+#include "fmt.h"
+#include "{{ peripheral_name }}.h"
+#include "{{ peripheral_name }}_params.h"
+#include "xtimer.h"
+
+
+{% include 'templates/mqtt_con.c.tmpl' %}
+
+
+{% if peripheral_name == "srf04" -%}
+{% include 'templates/srf04.c.tmpl' %}
+{% elif peripheral_name == "bme680" -%}
+{% include 'templates/bme680.c.tmpl' %}
+{% else %}
+/*
+ * Function that triggers and returns sensor measurement
+ */
+static int gen_sensor_values(void)
+{
+    ; // You need to fill this function
+}
+{% endif -%}
+
+
+/*
+ * Function that starts the procedure. Every five seconds it      
+ * gets a new sensor measurement and publishes it to topic    
+ * 'sensor/{{ peripheral_name }}_<id>'. The number of messages to be         
+ * publshed is also specified.                   
+ *                                               
+ * - arg 1     MQTT-SN Gateway IP address
+ * - arg 2     ID of node that publishes         
+ * - arg 3     Number of messages to be published
+ */
+
+static int start(char *addr, int id, int num_of_msgs)
+{
+    /* Name of the topic */
+    char topic[32];
+    sprintf(topic, "sensor/{{ peripheral_name }}_%d", id);
+
+    /* Message to be published */
+    char msg[128];
+
+    /* Try to connect to the gateway */
+    while (con(addr, EMCUTE_PORT))
+        ;
+
+    /* Publish sensor output every 5 seconds */
+    for (int i = 0; i < num_of_msgs; i++)
+    {
+        /* Get a sensor measurement */
+        int output = gen_sensor_values();
+
+        /* Create a message to be published */
+        sprintf(msg, "{id: %d, {{ peripheral_name }} Output: %.1f}", id, (float)output / 10);
+
+        /* publish to the topic */
+        pub(topic, msg, 0);
+
+        /* it sleeps for five seconds */
+        xtimer_sleep(1);
+    }
+
+    /* Disconnect from the gateway */
+    discon();
+
+    return 0;
+}
+
+int main(void)
+{
+    puts("MQTT-SN application\n");
+    printf("This application runs on %s\n", RIOT_BOARD);
+
+    /* The main thread needs a msg queue to be able to run `ping6` */
+    msg_init_queue(queue, ARRAY_SIZE(queue));
+
+    // /* Initialize our subscription buffers */
+    // memset(subscriptions, 0, (NUMOFSUBS * sizeof(emcute_sub_t)));
+
+    /* Start the emcute thread */
+    thread_create(stack, sizeof(stack), EMCUTE_PRIO, 0,
+                  emcute_thread, NULL, "emcute");
+
+    /* Start the procedure*/
+    start("{{ address }}", {{ id }}, {{ num_of_msgs }});
+
+    return 0;
+}

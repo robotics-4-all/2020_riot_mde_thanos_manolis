@@ -1,0 +1,47 @@
+/*
+ * Function that triggers and returns bme680 sensor measurement
+ */
+static int gen_sensor_values(void)
+{
+    /* Fix port parameter for digital sensor */
+    bme680_params_t my_params;
+
+    // my_params.ifsel              = BME680_I2C_INTF;          
+    // my_params.temp_os            = BME680_OS_8X;             
+    // my_params.hum_os             = BME680_OS_2X;             
+    // my_params.pres_os            = BME680_OS_4X;             
+    // my_params.filter             = BME680_FILTER_SIZE_3;     
+    // my_params.gas_measure        = BME680_ENABLE_GAS_MEAS;   
+    // my_params.heater_dur         = 320;                      
+    // my_params.heater_temp        = 150;                      
+    // my_params.settings           = BME680_OST_SEL;
+    // my_params.intf.i2c.dev   = BME680_PARAM_I2C_DEV;
+    // my_params.intf.i2c.addr  = BME680_PARAM_I2C_ADDR;
+
+    /* Initialize BME680 sensor */
+    bme680_t dev;
+    if ( bme680_init(&dev, &my_params) ==  0)
+        printf("BME680 sensor connected\n");
+    else {
+        printf("Failed to connect to BME680 sensor\n");
+        return 1;
+    }
+
+    if ( bme680_force_measurement(&dev) == 0)
+        printf("TPHG measurement started successfully\n");
+    else {
+        printf("Failed to start TPHG measurement\n");
+        return 1;
+    }
+
+    bme680_field_data_t data;
+    int get_data_return = bme680_get_data(&dev, &data);
+
+    if ( get_data_return < 0 ) {
+        printf("Error: No valid measurement is available\n");
+        return get_data_return;
+    }else {
+        printf("BME680 values - dist: %.1f cm\n", (float)data.temperature);
+        return data.temperature;
+    }
+}
