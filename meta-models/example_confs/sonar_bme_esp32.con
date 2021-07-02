@@ -6,7 +6,6 @@ connection:
     name: sonar_esp32
     board: esp32_wroom_32
     peripheral: srf04
-    peripheral_impl: srf04_esp32_GPIO
     power_connections:
 	- gnd_1 -- gnd
 	- power_5v -- vcc 
@@ -18,13 +17,12 @@ connection:
 	address: 2a02:587:5401:b0f4:2e33:7aff:fefb:d97f
 	port: 1885
 	msg: Distance
-	frequency: 10 hz
+	frequency: 5 hz
 
 connection:
     name: bme680_esp32
     board: esp32_wroom_32
     peripheral: bme680
-    peripheral_impl: bme680_esp32_i2c
     power_connections:
 	- gnd_1 -- gnd
 	- power_5v -- vcc 
@@ -36,4 +34,4 @@ connection:
 	address: 2a02:587:5401:b0f4:2e33:7aff:fefb:d97f
 	port: 1885
 	msg: Env
-	frequency: 10 hz
+	frequency: 5 hz
