@@ -1,7 +1,7 @@
 /*
- * Function that triggers and returns srf04 sensor measurement
+ * Function that initializes srf04 sensor
  */
-static int gen_sensor_values(void)
+static srf04_t init_sensor(void)
 {
     /* Fix port parameter for digital sensor */
     srf04_params_t my_params;
@@ -15,11 +15,16 @@ static int gen_sensor_values(void)
     if (srf04_init(&dev, &my_params) == SRF04_OK)
         printf("SRF04 sensor connected\n");
     else
-    {
         printf("Failed to connect to SRF04 sensor\n");
-        return 1;
-    }
 
+    return dev;
+}
+
+/*
+ * Function that triggers and returns srf04 sensor measurement
+ */
+static int gen_sensor_values(srf04_t dev)
+{
     int dist = srf04_get_distance(&dev);
 
     if (dist == SRF04_ERR_INVALID)

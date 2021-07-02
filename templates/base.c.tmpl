@@ -20,6 +20,14 @@
 {% include 'templates/bme680.c.tmpl' -%}
 {% else -%}
 /*
+ * Function that initializes {{ peripheral_name }} sensor
+ */
+static {{ peripheral_name }}_t init_sensor(void)
+{
+    ; // You need to fill this function
+}
+
+/*
  * Function that triggers and returns sensor measurement
  */
 static int gen_sensor_values(void)
@@ -41,23 +49,20 @@ static int start(void)
     /* Name of the topic */
     char topic[32];
     sprintf(topic, "sensor/{{ peripheral_name }}_{{ id }}");
-
-    /* Message to be published */
-    char msg[128];
-
+    
     /* Try to connect to the gateway */
     if (con(EMCUTE_ADDRESS, EMCUTE_PORT))
     {
         printf("Couldn't connect to broker. The measurements will just be printed instead.\n");
 
+        /* Initialize sensor */
+        {{ peripheral_name }}_t dev = init_sensor();
+
         /* Print sensor output every 1/{{ frequency }} seconds */
         while(true)
         {
             /* Get a sensor measurement */
-            int output = gen_sensor_values();
-
-            /* Print output */
-            printf("{id: {{ id }}, {{ peripheral_name }} Output: %.1f}\n", (float)output / 10);
+            gen_sensor_values(dev);
 
             /* Sleep for five seconds */
             xtimer_sleep( 1 / {{ frequency }} );
@@ -65,11 +70,17 @@ static int start(void)
     }
     else
     {
+        /* Initialize sensor */
+        {{ peripheral_name }}_t dev = init_sensor();
+
         /* Publish sensor output every 1/{{ frequency }} seconds */
         while(true)
         {
+            /* Message to be published */
+            char msg[128];
+
             /* Get a sensor measurement */
-            int output = gen_sensor_values();
+            int output = gen_sensor_values(dev);
 
             /* Create a message to be published */
             sprintf(msg, "{id: {{ id }}, {{ peripheral_name }} Output: %.1f}", (float)output / 10);

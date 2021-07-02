@@ -1,7 +1,7 @@
 /*
- * Function that triggers and returns bme680 sensor measurement
+ * Function that initializes bme680 sensor
  */
-static int gen_sensor_values(void)
+static bme680_t init_sensor(void)
 {
     /* Fix port parameter for digital sensor */
     bme680_params_t my_params;
@@ -22,11 +22,17 @@ static int gen_sensor_values(void)
     bme680_t dev;
     if ( bme680_init(&dev, &my_params) ==  0)
         printf("BME680 sensor connected\n");
-    else {
+    else
         printf("Failed to connect to BME680 sensor\n");
-        return 1;
-    }
 
+    return dev;
+}
+
+/*
+ * Function that triggers and returns bme680 sensor measurement
+ */
+static int gen_sensor_values(bme680_t dev)
+{
     if ( bme680_force_measurement(&dev) == 0)
         printf("TPHG measurement started successfully\n");
     else {
