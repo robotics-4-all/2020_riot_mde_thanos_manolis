@@ -27,7 +27,9 @@ connection:
 	- gnd_1 -- gnd
 	- power_5v -- vcc 
     hw_connections:
-	- i2c: i2c_1 -- i2c_0
+	- i2c: 
+		sda: p_21 -- sda
+	 	scl: p_22 -- scl
 		slave_address: 0x76
     communication_endpoint:
 	topic: bme.data

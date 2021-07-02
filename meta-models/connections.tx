@@ -66,7 +66,9 @@ SPI:
 ;
 
 I2C:
-	"-" type="i2c" ":" board_int=ID "--" peripheral_int=ID
+	"-" type="i2c:" 
+	"sda:" board_int=ID "--" peripheral_int=ID
+	"scl:" board_int=ID "--" peripheral_int=ID
 	"slave_address:" "0x" slave_addr=INT
 ;
 
