@@ -5,19 +5,20 @@
 #include <time.h>
 #include "shell.h"
 #include "msg.h"
-
-/* Peripheral includes */
 #include "fmt.h"
-#include "{{ peripheral_name }}.h"
-#include "{{ peripheral_name }}_params.h"
 #include "xtimer.h"
 
+/* Peripheral includes */
+#include "{{ peripheral_name }}.h"
+#include "{{ peripheral_name }}_params.h"
+
 {% include 'templates/mqtt_con.c.tmpl' %}
+
 {% if peripheral_name == "srf04" -%}
-{% include 'templates/srf04.c.tmpl' %}
+{% include 'templates/srf04.c.tmpl' -%}
 {% elif peripheral_name == "bme680" -%}
-{% include 'templates/bme680.c.tmpl' %}
-{% else %}
+{% include 'templates/bme680.c.tmpl' -%}
+{% else -%}
 /*
  * Function that triggers and returns sensor measurement
  */
@@ -25,50 +26,64 @@ static int gen_sensor_values(void)
 {
     ; // You need to fill this function
 }
-
-{% endif -%}
+{%- endif %}
 
 /*
  * Function that starts the procedure. Every five seconds it      
  * gets a new sensor measurement and publishes it to topic    
- * 'sensor/{{ peripheral_name }}_<id>'. The number of messages to be         
+ * 'sensor/{{ peripheral_name }}_{{ id }}'. The number of messages to be         
  * publshed is also specified.                   
- *                                               
- * - arg 1     MQTT-SN Gateway IP address
- * - arg 2     ID of node that publishes         
- * - arg 3     Number of messages to be published
+ *                                                     
+ * - arg 1     Number of messages to be published
  */
-static int start(char *addr, int id, int num_of_msgs)
+static int start(void)
 {
     /* Name of the topic */
     char topic[32];
-    sprintf(topic, "sensor/{{ peripheral_name }}_%d", id);
+    sprintf(topic, "sensor/{{ peripheral_name }}_{{ id }}");
 
     /* Message to be published */
     char msg[128];
 
     /* Try to connect to the gateway */
-    while (con(addr, EMCUTE_PORT))
-        ;
-
-    /* Publish sensor output every 5 seconds */
-    for (int i = 0; i < num_of_msgs; i++)
+    if (con(EMCUTE_ADDRESS, EMCUTE_PORT))
     {
-        /* Get a sensor measurement */
-        int output = gen_sensor_values();
+        printf("Couldn't connect to broker. The measurements will just be printed instead.\n");
 
-        /* Create a message to be published */
-        sprintf(msg, "{id: %d, {{ peripheral_name }} Output: %.1f}", id, (float)output / 10);
+        /* Print sensor output every 1/{{ frequency }} seconds */
+        while(true)
+        {
+            /* Get a sensor measurement */
+            int output = gen_sensor_values();
 
-        /* publish to the topic */
-        pub(topic, msg, 0);
+            /* Print output */
+            printf("{id: {{ id }}, {{ peripheral_name }} Output: %.1f}\n", (float)output / 10);
 
-        /* it sleeps for five seconds */
-        xtimer_sleep(1);
+            /* Sleep for five seconds */
+            xtimer_sleep( 1 / {{ frequency }} );
+        }
     }
+    else
+    {
+        /* Publish sensor output every 1/{{ frequency }} seconds */
+        while(true)
+        {
+            /* Get a sensor measurement */
+            int output = gen_sensor_values();
 
-    /* Disconnect from the gateway */
-    discon();
+            /* Create a message to be published */
+            sprintf(msg, "{id: {{ id }}, {{ peripheral_name }} Output: %.1f}", (float)output / 10);
+
+            /* Publish to the topic */
+            pub(topic, msg, 0);
+
+            /* Sleep for five seconds */
+            xtimer_sleep( 1 / {{ frequency }} );
+        }
+
+        /* Disconnect from the gateway */
+        discon();
+    }
 
     return 0;
 }
@@ -89,7 +104,7 @@ int main(void)
                   emcute_thread, NULL, "emcute");
 
     /* Start the procedure*/
-    start("{{ address }}", {{ id }}, {{ num_of_msgs }});
+    start();
 
     return 0;
 }

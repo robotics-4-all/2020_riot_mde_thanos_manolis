@@ -86,11 +86,22 @@ def main():
 
         # Parse info from the created models
         address_tmp = connection_model.connections[i].com_endpoint.addr
-        id_tmp = i
+        id_tmp = i + 1
         num_of_msgs_tmp = 10
         mqtt_port = connection_model.connections[i].com_endpoint.port
         connection_name_tmp = connection_model.connections[i].name
         peripheral_name_tmp = connection_model.connections[i].peripheral.device
+        module_tmp = connection_model.connections[i].peripheral.device
+
+        # Publishing frequency (always convert to Hz)
+        frequency_tmp = connection_model.connections[i].com_endpoint.freq.val
+        frequency_unit = connection_model.connections[i].com_endpoint.freq.unit
+        if (frequency_unit == "khz"):
+            frequency_tmp = (10**3) * frequency_tmp
+        elif (frequency_unit == "mhz"):
+            frequency_tmp = (10**6) * frequency_tmp
+        elif (frequency_unit == "ghz"):
+            frequency_tmp = (10**9) * frequency_tmp
 
         # Hardware connection args
         args_tmp = {}
@@ -100,7 +111,7 @@ def main():
             args_tmp["trigger_pin"] = (connection_model.connections[i].hw_conns[1].board_int).split("_",1)[1]
         elif (connection_model.connections[i].hw_conns[0].type == 'i2c'):
             args_tmp["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
-            peripheral_name_tmp = peripheral_name_tmp + '_i2c'
+            module_tmp = module_tmp + '_i2c'
 
         # Create folder for this connection's source code
         Path("codegen/" + connection_name_tmp).mkdir(parents=True, exist_ok=True)
@@ -111,14 +122,15 @@ def main():
                               num_of_msgs=num_of_msgs_tmp,
                               port=mqtt_port,
                               peripheral_name=peripheral_name_tmp,
-                              args=args_tmp)        
+                              args=args_tmp,
+                              frequency=frequency_tmp)        
         ofh = codecs.open("codegen/" + connection_name_tmp + "/" + peripheral_name_tmp + ".c", "w", encoding="utf-8")
         ofh.write(rt)
         ofh.close()
 
         # Makefile template
         rt = template2.render(connection_name=connection_name_tmp,
-                              module=peripheral_name_tmp)
+                              module=module_tmp)
         ofh = codecs.open("codegen/" + connection_name_tmp + "/Makefile", "w", encoding="utf-8")
         ofh.write(rt)
         ofh.close()
