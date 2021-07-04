@@ -3,8 +3,11 @@
 """parser.py"""
 
 # textX imports
-from textx.export import metamodel_export, model_export
+from textx.export import metamodel_export, model_export, PlantUmlRenderer
 from textx import metamodel_from_file
+
+# PlantUML Imports
+from plantuml import PlantUML
 
 # Jinja imports
 import codecs
@@ -30,16 +33,17 @@ def main():
     board_conf = args[0]
     connection_conf = args[1]
 
+    # Create a PlantUML object for converting pu code to images
+    uml_obj = PlantUML('http://www.plantuml.com/plantuml/img/')
+
     """ Parse info from device meta-model """
 
     # Get meta-model from language description
     devices_mm = metamodel_from_file('meta-models/devices.tx')
 
-    # Export meta-model to dot and png
-    metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.dot')
-    (graph,) = pydot.graph_from_dot_file(
-        'meta-models/dotexport/devices_mm.dot')
-    graph.write_png('meta-models/dotexport/devices_mm.png')
+    # Export meta-model to PlantUML (.pu) and then png
+    metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.pu', renderer=PlantUmlRenderer())
+    uml_obj.processes_file('meta-models/dotexport/devices_mm.pu')
 
     # Construct device model from a specific file
     device_model = devices_mm.model_from_file(
@@ -56,11 +60,9 @@ def main():
     # Get meta-model from language description
     connections_mm = metamodel_from_file('meta-models/connections.tx')
 
-    # Export meta-model to dot and png
-    metamodel_export(connections_mm, 'meta-models/dotexport/connections_mm.dot')
-    (graph,) = pydot.graph_from_dot_file(
-        'meta-models/dotexport/connections_mm.dot')
-    graph.write_png('meta-models/dotexport/connections_mm.png')
+    # Export meta-model to PlantUML (.pu) and then png
+    metamodel_export(connections_mm, 'meta-models/dotexport/connections_mm.pu', renderer=PlantUmlRenderer())
+    uml_obj.processes_file('meta-models/dotexport/connections_mm.pu')
 
     # Construct connection model from a specific file
     connection_model = connections_mm.model_from_file(
