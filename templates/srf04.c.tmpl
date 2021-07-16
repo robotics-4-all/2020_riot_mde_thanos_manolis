@@ -17,23 +17,27 @@ static int init_sensor(srf04_t *dev)
 /*
  * Function that triggers and returns srf04 sensor measurement
  */
-static int gen_sensor_values(srf04_t dev)
+static char *gen_sensor_values(srf04_t dev)
 {
     int dist = srf04_get_distance(&dev);
 
     if (dist == SRF04_ERR_INVALID)
     {
         printf("Error: No valid measurement is available\n");
-        return SRF04_ERR_INVALID;
+        return (char*)SRF04_ERR_INVALID;
     }
     else if (dist == SRF04_ERR_MEASURING)
     {
         printf("Error: measurement is in progress\n");
-        return SRF04_ERR_MEASURING;
+        return (char*)SRF04_ERR_MEASURING;
     }
     else
     {
-        printf("SRF04 values - dist: %.1f cm\n", (float)dist / 10);
-        return dist;
+        printf("SRF04 values - dist: %.2f cm\n", (float)dist / 10);
+        
+        char *output = malloc(128);
+        sprintf(output, "[Distance]: %.2f cm\n", (float)dist / 10);
+        
+        return output;
     }
 }

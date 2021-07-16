@@ -18,6 +18,8 @@
 {% include 'templates/srf04.c.tmpl' -%}
 {% elif peripheral_name == "bme680" -%}
 {% include 'templates/bme680.c.tmpl' -%}
+{% elif peripheral_name == "mpl3115a2" -%}
+{% include 'templates/mpl3115a2.c.tmpl' -%}
 {% else -%}
 /*
  * Function that initializes {{ peripheral_name }} sensor
@@ -67,7 +69,7 @@ static int start(void)
             /* Get a sensor measurement */
             gen_sensor_values(dev);
 
-            /* Sleep for five seconds */
+            /* Sleep for 1/{{ frequency }} seconds */
             xtimer_sleep( 1 / {{ frequency }} );
         }
     }
@@ -90,15 +92,15 @@ static int start(void)
             char msg[128];
 
             /* Get a sensor measurement */
-            int output = gen_sensor_values(dev);
+            char *output = gen_sensor_values(dev);
 
             /* Create a message to be published */
-            sprintf(msg, "{id: {{ id }}, {{ peripheral_name }} Output: %.1f}", (float)output / 10);
+            sprintf(msg, "{id: {{ id }}, {{ peripheral_name }} Output: %s}", output);
 
             /* Publish to the topic */
             pub(topic, msg, 0);
 
-            /* Sleep for five seconds */
+            /* Sleep for 1/{{ frequency }} seconds */
             xtimer_sleep( 1 / {{ frequency }} );
         }
 

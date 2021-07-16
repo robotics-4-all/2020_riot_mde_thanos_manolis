@@ -37,3 +37,22 @@ connection:
 	port: 1885
 	msg: Env
 	frequency: 5 hz
+
+connection:
+    name: mpl3115a2_esp32
+    board: esp32_wroom_32
+    peripheral: mpl3115a2
+    power_connections:
+	- gnd_1 -- gnd
+	- power_5v -- vcc 
+    hw_connections:
+	- i2c: 
+		sda: p_21 -- sda
+	 	scl: p_22 -- scl
+		slave_address: 0x76
+    communication_endpoint:
+	topic: mpl3115a2.data
+	address: 2a02:587:5401:b0f4:2e33:7aff:fefb:d97f
+	port: 1885
+	msg: Env
+	frequency: 1 hz

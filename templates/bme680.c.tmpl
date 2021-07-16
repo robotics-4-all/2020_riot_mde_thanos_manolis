@@ -25,13 +25,13 @@ static int init_sensor(bme680_t *dev)
 /*
  * Function that triggers and returns bme680 sensor measurement
  */
-static int gen_sensor_values(bme680_t dev)
+static char *gen_sensor_values(bme680_t dev)
 {
     if ( bme680_force_measurement(&dev) == 0)
         printf("TPHG measurement started successfully\n");
     else {
         printf("Failed to start TPHG measurement\n");
-        return 1;
+        return "1";
     }
 
     bme680_field_data_t data;
@@ -39,9 +39,13 @@ static int gen_sensor_values(bme680_t dev)
 
     if ( get_data_return < 0 ) {
         printf("Error: No valid measurement is available\n");
-        return get_data_return;
+        return (char*)get_data_return;
     }else {
-        printf("BME680 values - dist: %.1f cm\n", (float)data.temperature);
-        return data.temperature;
+        printf("BME680 values - Temperature: %.1f C\n", (float)data.temperature);
+
+        char *output = malloc(128);
+        sprintf(output, "[Temperature]: %.1f C\n", (float)data.temperature);
+
+        return output;
     }
 }

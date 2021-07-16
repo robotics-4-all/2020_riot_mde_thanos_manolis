@@ -1,0 +1,42 @@
+/*
+ * Function that initializes srf04 sensor
+ */
+static int init_sensor(mpl3115a2_t *dev)
+{
+    int init = mpl3115a2_init(dev, &mpl3115a2_params[0]);
+    if ( init != MPL3115A2_OK ) 
+    {
+        puts("Error: Failed to init device!");
+        return init;
+    }
+
+    return mpl3115a2_set_active(dev);
+}
+
+/*
+ * Function that triggers and returns srf04 sensor measurement
+ */
+static char *gen_sensor_values(mpl3115a2_t dev)
+{
+    uint32_t pressure;
+    int16_t temp;
+    uint8_t status;
+
+    if ((mpl3115a2_read_pressure(&dev, &pressure, &status) |
+         mpl3115a2_read_temp(&dev, &temp)) != MPL3115A2_OK)
+    {
+        puts("Error: Failed to read values!");
+        return "1";
+    }
+    else
+    {
+        printf("Pressure: %u Pa, Temperature: %3d.%d C, State: %#02x\n",
+               (unsigned int)pressure, temp / 10, abs(temp % 10), status);
+
+        char *output = malloc(128);
+        sprintf(output, "[Pressure]: %u Pa, [Temperature]: %3d.%d C, [State]: %#02x\n",
+                (unsigned int)pressure, temp / 10, abs(temp % 10), status);
+
+        return output;
+    }
+}

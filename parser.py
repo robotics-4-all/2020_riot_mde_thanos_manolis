@@ -115,7 +115,8 @@ def main():
             args_tmp["trigger_pin"] = (connection_model.connections[i].hw_conns[1].board_int).split("_",1)[1]
         elif (connection_model.connections[i].hw_conns[0].type == 'i2c'):
             args_tmp["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
-            module_tmp = module_tmp + '_i2c'
+            if(connection_model.connections[i].name == 'bme680'):
+                module_tmp = module_tmp + '_i2c'
 
         # Create folder for this connection's source code
         Path("codegen/" + connection_name_tmp).mkdir(parents=True, exist_ok=True)
