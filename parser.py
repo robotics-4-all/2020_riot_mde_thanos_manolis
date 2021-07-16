@@ -40,7 +40,7 @@ def main():
 
     # Export meta-model to PlantUML (.pu) and then png
     metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.pu', renderer=PlantUmlRenderer())
-    os.system('plantuml meta-models/dotexport/devices_mm.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/devices_mm.pu')
 
     # Construct device model from a specific file
     device_model = devices_mm.model_from_file(
@@ -59,7 +59,7 @@ def main():
 
     # Export meta-model to PlantUML (.pu) and then png
     metamodel_export(connections_mm, 'meta-models/dotexport/connections_mm.pu', renderer=PlantUmlRenderer())
-    os.system('plantuml meta-models/dotexport/connections_mm.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/connections_mm.pu')
 
     # Construct connection model from a specific file
     connection_model = connections_mm.model_from_file(
@@ -67,7 +67,7 @@ def main():
 
     # Export model to PlantUML (.pu) and then png
     model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
-    os.system('plantuml meta-models/dotexport/' + connection_conf + '.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
 
     #####################################################################################
     # model_export(connection_model, 'meta-models/dotexport/' + connection_conf + '.dot')
