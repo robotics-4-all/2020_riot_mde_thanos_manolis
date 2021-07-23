@@ -15,7 +15,7 @@ INCLUDE:
 ;
 
 INCLUDE_TYPES:
-	"esp32_wroom_32" | "wemos_d1_mini" | "srf04" | "bme680"
+	"esp32_wroom_32" | "wemos_d1_mini" | "srf04" | "bme680" | "mpl3115a2"
 ;
 
 CONNECTION:

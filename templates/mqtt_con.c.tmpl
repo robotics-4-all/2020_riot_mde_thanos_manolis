@@ -1,24 +1,4 @@
-/* MQTT-S includes */
-#include "net/emcute.h"
-#include "net/ipv6/addr.h"
-
-#ifndef EMCUTE_ID
-#define EMCUTE_ID ("gertrud")
-#endif
-#define EMCUTE_PORT ({{ port }})
-#define EMCUTE_ADDRESS ("{{ address }}")
-#define EMCUTE_PRIO (THREAD_PRIORITY_MAIN - 1)
-
-#define NUMOFSUBS (16U)
-#define TOPIC_MAXLEN (64U)
-
-static char stack[THREAD_STACKSIZE_DEFAULT];
-static msg_t queue[8];
-
-// static emcute_sub_t subscriptions[NUMOFSUBS];
-// static char topics[NUMOFSUBS][TOPIC_MAXLEN];
-
-static void *emcute_thread(void *arg)
+void *emcute_thread(void *arg)
 {
     (void)arg;
     emcute_run(EMCUTE_PORT, EMCUTE_ID);
@@ -28,7 +8,7 @@ static void *emcute_thread(void *arg)
 /*
  * Function to get qos level
  */
-static unsigned get_qos(int qos)
+unsigned get_qos(int qos)
 {
     switch (qos)
     {
@@ -47,7 +27,7 @@ static unsigned get_qos(int qos)
  * - param addr    MQTT-SN Gateway IP address      
  * - param port    MQTT-SN Gateway Port            
  */
-static int con(char *addr, int port)
+int con(char *addr, int port)
 {
     sock_udp_ep_t gw = {.family = AF_INET6, .port = EMCUTE_PORT};
     gw.port = port;
@@ -72,7 +52,7 @@ static int con(char *addr, int port)
 /*
  * Function that disconnects from the MQTT-SN gateway
  */
-static int discon(void)
+int discon(void)
 {
     int res = emcute_discon();
 
@@ -98,7 +78,7 @@ static int discon(void)
  * - param data    Message to be published      
  * - param qos     Quality of service           
  */
-static int pub(char *topic, char *data, int qos)
+int pub(char *topic, char *data, int qos)
 {
     emcute_topic_t t;
     unsigned flags = EMCUTE_QOS_0;

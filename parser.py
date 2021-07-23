@@ -39,18 +39,18 @@ def main():
     devices_mm = metamodel_from_file('meta-models/devices.tx')
 
     # Export meta-model to PlantUML (.pu) and then png
-    metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.pu', renderer=PlantUmlRenderer())
-    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/devices_mm.pu')
+    # metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.pu', renderer=PlantUmlRenderer())
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/devices_mm.pu')
 
     # Construct device model from a specific file
     device_model = devices_mm.model_from_file(
         'meta-models/example_confs/' + board_conf + '.hwd')
 
     # Export model to dot and png
-    model_export(device_model, 'meta-models/dotexport/' + board_conf + '.dot')
-    (graph,) = pydot.graph_from_dot_file(
-        'meta-models/dotexport/' + board_conf + '.dot')
-    graph.write_png('meta-models/dotexport/' + board_conf + '.png')
+    # model_export(device_model, 'meta-models/dotexport/' + board_conf + '.dot')
+    # (graph,) = pydot.graph_from_dot_file(
+    #     'meta-models/dotexport/' + board_conf + '.dot')
+    # graph.write_png('meta-models/dotexport/' + board_conf + '.png')
 
     """ Parse info from connections meta-model """
 
@@ -58,8 +58,8 @@ def main():
     connections_mm = metamodel_from_file('meta-models/connections.tx')
 
     # Export meta-model to PlantUML (.pu) and then png
-    metamodel_export(connections_mm, 'meta-models/dotexport/connections_mm.pu', renderer=PlantUmlRenderer())
-    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/connections_mm.pu')
+    # metamodel_export(connections_mm, 'meta-models/dotexport/connections_mm.pu', renderer=PlantUmlRenderer())
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/connections_mm.pu')
 
     # Construct connection model from a specific file
     connection_model = connections_mm.model_from_file(
@@ -68,13 +68,6 @@ def main():
     # Export model to PlantUML (.pu) and then png
     model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
     os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
-
-    #####################################################################################
-    # model_export(connection_model, 'meta-models/dotexport/' + connection_conf + '.dot')
-    # (graph,) = pydot.graph_from_dot_file(
-    #     'meta-models/dotexport/' + connection_conf + '.dot')
-    # graph.write_png('meta-models/dotexport/' + connection_conf + '_.png')
-    #####################################################################################
 
     """ Produce source code from templates """
 
@@ -86,59 +79,64 @@ def main():
     template2 = env.get_template(
         'templates/Makefile.tmpl')
     
+    peripheral_name_tmp = {}
+    id_tmp = {}
+    frequency_tmp = {}
+    module_tmp = {}
+    args_tmp = {}
+    num_of_peripherals_tmp = len(connection_model.connections)
+
     for i in range(len(connection_model.connections)):
 
         # Parse info from the created models
         address_tmp = connection_model.connections[i].com_endpoint.addr
-        id_tmp = i + 1
-        num_of_msgs_tmp = 10
+        id_tmp[i] = i + 1
         mqtt_port = connection_model.connections[i].com_endpoint.port
-        connection_name_tmp = connection_model.connections[i].name
-        peripheral_name_tmp = connection_model.connections[i].peripheral.device
-        module_tmp = connection_model.connections[i].peripheral.device
+        peripheral_name_tmp[i] = connection_model.connections[i].peripheral.device
+        module_tmp[i] = connection_model.connections[i].peripheral.device
 
         # Publishing frequency (always convert to Hz)
-        frequency_tmp = connection_model.connections[i].com_endpoint.freq.val
+        frequency_tmp[i] = connection_model.connections[i].com_endpoint.freq.val
         frequency_unit = connection_model.connections[i].com_endpoint.freq.unit
         if (frequency_unit == "khz"):
-            frequency_tmp = (10**3) * frequency_tmp
+            frequency_tmp[i] = (10**3) * frequency_tmp[i]
         elif (frequency_unit == "mhz"):
-            frequency_tmp = (10**6) * frequency_tmp
+            frequency_tmp[i] = (10**6) * frequency_tmp[i]
         elif (frequency_unit == "ghz"):
-            frequency_tmp = (10**9) * frequency_tmp
+            frequency_tmp[i] = (10**9) * frequency_tmp[i]
 
         # Hardware connection args
-        args_tmp = {}
+        args_tmp[i] = {}
 
         if (connection_model.connections[i].hw_conns[0].type == 'gpio'):
-            args_tmp["echo_pin"] = (connection_model.connections[i].hw_conns[0].board_int).split("_",1)[1]
-            args_tmp["trigger_pin"] = (connection_model.connections[i].hw_conns[1].board_int).split("_",1)[1]
+            args_tmp[i]["echo_pin"] = (connection_model.connections[i].hw_conns[0].board_int).split("_",1)[1]
+            args_tmp[i]["trigger_pin"] = (connection_model.connections[i].hw_conns[1].board_int).split("_",1)[1]
         elif (connection_model.connections[i].hw_conns[0].type == 'i2c'):
-            args_tmp["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
+            args_tmp[i]["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
             if(connection_model.connections[i].name == 'bme680'):
-                module_tmp = module_tmp + '_i2c'
+                module_tmp[i] = module_tmp[i] + '_i2c'
 
-        # Create folder for this connection's source code
-        Path("codegen/" + connection_name_tmp).mkdir(parents=True, exist_ok=True)
+    # Create folder for this connection's source code
+    # Path("codegen/" + connection_conf).mkdir(parents=True, exist_ok=True)
 
-        # C template
-        rt = template1.render(address=address_tmp,
-                              id=id_tmp,
-                              num_of_msgs=num_of_msgs_tmp,
-                              port=mqtt_port,
-                              peripheral_name=peripheral_name_tmp,
-                              args=args_tmp,
-                              frequency=frequency_tmp)        
-        ofh = codecs.open("codegen/" + connection_name_tmp + "/" + peripheral_name_tmp + ".c", "w", encoding="utf-8")
-        ofh.write(rt)
-        ofh.close()
+    # C template
+    rt = template1.render(address=address_tmp,
+                            id=id_tmp,
+                            port=mqtt_port,
+                            peripheral_name=peripheral_name_tmp,
+                            args=args_tmp,
+                            frequency=frequency_tmp,
+                            num_of_peripherals = num_of_peripherals_tmp)        
+    ofh = codecs.open("codegen/" + connection_conf + ".c", "w", encoding="utf-8")
+    ofh.write(rt)
+    ofh.close()
 
-        # Makefile template
-        rt = template2.render(connection_name=connection_name_tmp,
-                              module=module_tmp)
-        ofh = codecs.open("codegen/" + connection_name_tmp + "/Makefile", "w", encoding="utf-8")
-        ofh.write(rt)
-        ofh.close()
+    # Makefile template
+    rt = template2.render(connection_conf=connection_conf,
+                          module=module_tmp)
+    ofh = codecs.open("codegen/Makefile", "w", encoding="utf-8")
+    ofh.write(rt)
+    ofh.close()
 
 
 if __name__ == '__main__':

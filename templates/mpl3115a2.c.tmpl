@@ -1,42 +1,55 @@
-/*
- * Function that initializes srf04 sensor
- */
-static int init_sensor(mpl3115a2_t *dev)
+void *send_mpl3115a2(void *arg)
 {
-    int init = mpl3115a2_init(dev, &mpl3115a2_params[0]);
-    if ( init != MPL3115A2_OK ) 
+    (void) arg;
+
+    /* Name of the topic */
+    char topic[32];
+    sprintf(topic, "sensor/mpl3115a2_{{ id[loop.index0] }}");
+
+    /* Initialize the sensor*/
+    mpl3115a2_t dev;
+    int init = mpl3115a2_init(&dev, &mpl3115a2_params[0]);
+    if ( init != MPL3115A2_OK )
+        puts("Error: Failed to initialize device!");
+
+    /* Activate measurement*/
+    if (mpl3115a2_set_active(&dev) == MPL3115A2_OK)
+        printf("MPL3115A2 sensor connected\n");
+    else 
+        printf("Failed to activate measurement\n");
+
+    /* Print sensor output with frequency {{ frequency[loop.index0] }} Hz */
+    while(true)
     {
-        puts("Error: Failed to init device!");
-        return init;
-    }
+        uint32_t pressure;
+        int16_t temp;
+        uint8_t status;
 
-    return mpl3115a2_set_active(dev);
-}
-
-/*
- * Function that triggers and returns srf04 sensor measurement
- */
-static char *gen_sensor_values(mpl3115a2_t dev)
-{
-    uint32_t pressure;
-    int16_t temp;
-    uint8_t status;
-
-    if ((mpl3115a2_read_pressure(&dev, &pressure, &status) |
-         mpl3115a2_read_temp(&dev, &temp)) != MPL3115A2_OK)
-    {
-        puts("Error: Failed to read values!");
-        return "1";
-    }
-    else
-    {
-        printf("Pressure: %u Pa, Temperature: %3d.%d C, State: %#02x\n",
-               (unsigned int)pressure, temp / 10, abs(temp % 10), status);
-
-        char *output = malloc(128);
-        sprintf(output, "[Pressure]: %u Pa, [Temperature]: %3d.%d C, [State]: %#02x\n",
+        if ((mpl3115a2_read_pressure(&dev, &pressure, &status) |
+            mpl3115a2_read_temp(&dev, &temp)) != MPL3115A2_OK)
+        {
+            puts("Error: Failed to read values!");
+        }
+        else
+        {
+            printf("Pressure: %u Pa, Temperature: %3d.%d C, State: %#02x\n",
                 (unsigned int)pressure, temp / 10, abs(temp % 10), status);
+            
+            /* Message to be published */
+            char *msg = malloc(128);
 
-        return output;
+            /* Create a message to be published */
+            sprintf(msg, "{id: {{ id[loop.index0] }}, MPL3115A2 Output: [Pressure]: %u Pa, "
+                         "[Temperature]: %3d.%d C, [State]: %#02x\n}",
+                    (unsigned int)pressure, temp / 10, abs(temp % 10), status);
+
+            /* Publish to the topic */
+            pub(topic, msg, 0);
+        }
+
+        /* Sleep for 1/{{ frequency[loop.index0] }} seconds */
+        xtimer_sleep( 1 / {{ frequency[loop.index0] }} );
     }
+
+    return NULL;
 }

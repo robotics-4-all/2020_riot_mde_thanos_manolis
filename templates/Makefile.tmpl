@@ -1,5 +1,5 @@
 # name of your application
-APPLICATION = {{connection_name}}
+APPLICATION = {{connection_conf}}
 
 # If no BOARD is found in the environment, use this default:
 BOARD ?= native
@@ -8,9 +8,11 @@ BOARD ?= native
 RIOTBASE ?= $(HOME)/RIOT
 
 # Include Peripheral and FMT module
+{%- for module in module.values() %}
 USEMODULE += {{module}}
-USEMODULE += fmt
+{%- endfor %}
 
+USEMODULE += fmt
 USEMODULE += xtimer
 
 # Comment this out to disable code in RIOT that does safety checking
