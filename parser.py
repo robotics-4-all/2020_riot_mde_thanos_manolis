@@ -113,7 +113,7 @@ def main():
             args_tmp[i]["trigger_pin"] = (connection_model.connections[i].hw_conns[1].board_int).split("_",1)[1]
         elif (connection_model.connections[i].hw_conns[0].type == 'i2c'):
             args_tmp[i]["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
-            if(connection_model.connections[i].name == 'bme680'):
+            if(connection_model.connections[i].peripheral.device == 'bme680'):
                 module_tmp[i] = module_tmp[i] + '_i2c'
 
     # Create folder for this connection's source code

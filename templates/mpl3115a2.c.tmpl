@@ -31,17 +31,16 @@ void *send_mpl3115a2(void *arg)
             puts("Error: Failed to read values!");
         }
         else
-        {
-            printf("Pressure: %u Pa, Temperature: %3d.%d C, State: %#02x\n",
-                (unsigned int)pressure, temp / 10, abs(temp % 10), status);
-            
-            /* Message to be published */
+        {            
+            /* Allocate memory for the message to be published */
             char *msg = malloc(128);
 
             /* Create a message to be published */
             sprintf(msg, "{id: {{ id[loop.index0] }}, MPL3115A2 Output: [Pressure]: %u Pa, "
-                         "[Temperature]: %3d.%d C, [State]: %#02x\n}",
+                         "[Temperature]: %3d.%d C, [State]: %#02x}\n",
                     (unsigned int)pressure, temp / 10, abs(temp % 10), status);
+            
+            printf("%s", msg);
 
             /* Publish to the topic */
             pub(topic, msg, 0);

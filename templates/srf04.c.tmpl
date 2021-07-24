@@ -36,15 +36,15 @@ void *send_srf04(void *arg)
         }
         else
         {
-            printf("SRF04 values - dist: %.2f cm\n", (float)dist / 10);
-
-            /* Message to be published */
+            /* Allocate memory for the message to be published */
             char *msg = malloc(128);
 
             /* Create a message to be published */
             sprintf(msg, "{id: {{ id[loop.index0] }}, SRF04 "
-                         "Output: [Distance]: %.2f cm\n}", 
+                         "Output: [Distance]: %.2f cm}\n", 
                     (float)dist / 10);
+
+            printf("%s", msg);
 
             /* Publish to the topic */
             pub(topic, msg, 0);

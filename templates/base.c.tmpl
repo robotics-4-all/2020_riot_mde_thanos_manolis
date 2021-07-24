@@ -7,14 +7,15 @@
 #include "msg.h"
 #include "fmt.h"
 #include "xtimer.h"
+#include "string.h"
 
 /* Peripheral includes */
-{% for name in peripheral_name.values() %}
-{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" -%}
+{%- for name in peripheral_name.values() -%}
+{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" %}
 #include "{{ name }}.h"
 #include "{{ name }}_params.h"
-{% endif %}
-{% endfor -%}
+{%- endif %}
+{%- endfor %}
 
 /* MQTT-S includes */
 #include "net/emcute.h"
@@ -35,14 +36,14 @@ msg_t queue[8];
 // static char topics[NUMOFSUBS][TOPIC_MAXLEN];
 
 {% for i in range(num_of_peripherals) -%}
-char stack{{ id[loop.index0] }}[THREAD_STACKSIZE_MAIN/{{ num_of_peripherals + 1 }}];
+char stack{{ id[loop.index0] }}[THREAD_STACKSIZE_DEFAULT];
 {% endfor -%}
-char stack_mqtt[THREAD_STACKSIZE_MAIN/{{ num_of_peripherals + 1 }}];
+char stack_mqtt[THREAD_STACKSIZE_DEFAULT];
 
 {% include 'templates/mqtt_con.c.tmpl' %}
 
 {% for name in peripheral_name.values() %}
-{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" -%}
+{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" %}
 /*
  * [ {{name}} sensor ] 
  * This function gets a sensor measurement with frequency {{ frequency[loop.index0] }} Hz 
@@ -60,80 +61,7 @@ char stack_mqtt[THREAD_STACKSIZE_MAIN/{{ num_of_peripherals + 1 }}];
 //     ; // You need to fill this function
 // }
 {% endif %}
-{% endfor -%}
-
-// /*
-//  * Function that starts the procedure. It gets a new sensor measurement 
-//  * with frequency {{ frequency }} Hz and publishes it to topic 'sensor/{{ peripheral_name }}_{{ id }}'.
-//  */
-// static int start(void)
-// {
-//     /* Name of the topic */
-//     char topic[32];
-//     sprintf(topic, "sensor/{{ peripheral_name }}_{{ id }}");
-    
-//     /* Try to connect to the gateway */
-//     if (con(EMCUTE_ADDRESS, EMCUTE_PORT))
-//     {
-//         printf("Couldn't connect to broker. The measurements will just be printed instead.\n");
-
-//         /* Initialize sensor */
-//         {{ peripheral_name }}_t dev;
-//         if (init_sensor(&dev) == 0)
-//             printf("{{ peripheral_name }} sensor connected\n");
-//         else
-//         {
-//             printf("Failed to connect to {{ peripheral_name }} sensor\n");
-//             return 1;
-//         }
-
-//         /* Print sensor output with frequency {{ frequency }} Hz */
-//         while(true)
-//         {
-//             /* Get a sensor measurement */
-//             gen_sensor_values(dev);
-
-//             /* Sleep for 1/{{ frequency }} seconds */
-//             xtimer_sleep( 1 / {{ frequency }} );
-//         }
-//     }
-//     else
-//     {
-//         /* Initialize sensor */
-//         {{ peripheral_name }}_t dev;
-//         if (init_sensor(&dev) == 0)
-//             printf("{{ peripheral_name }} sensor connected\n");
-//         else
-//         {
-//             printf("Failed to connect to {{ peripheral_name }} sensor\n");
-//             return 1;
-//         }
-
-//         /* Print sensor output with frequency {{ frequency }} Hz */
-//         while(true)
-//         {
-//             /* Message to be published */
-//             char msg[128];
-
-//             /* Get a sensor measurement */
-//             char *output = gen_sensor_values(dev);
-
-//             /* Create a message to be published */
-//             sprintf(msg, "{id: {{ id }}, {{ peripheral_name }} Output: %s}", output);
-
-//             /* Publish to the topic */
-//             pub(topic, msg, 0);
-
-//             /* Sleep for 1/{{ frequency }} seconds */
-//             xtimer_sleep( 1 / {{ frequency }} );
-//         }
-
-//         /* Disconnect from the gateway */
-//         discon();
-//     }
-
-//     return 0;
-// }
+{%- endfor %}
 
 int main(void)
 {

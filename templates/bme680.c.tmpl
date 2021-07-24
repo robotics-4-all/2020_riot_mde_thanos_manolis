@@ -1,51 +1,90 @@
-/*
- * Function that initializes bme680 sensor
- */
-static int init_sensor(bme680_t *dev)
+void *send_bme680(void *arg)
 {
-    /* Fix port parameter for digital sensor */
-    bme680_params_t my_params;
+    (void) arg;
 
-    // my_params.ifsel              = BME680_I2C_INTF;          
-    // my_params.temp_os            = BME680_OS_8X;             
-    // my_params.hum_os             = BME680_OS_2X;             
-    // my_params.pres_os            = BME680_OS_4X;             
-    // my_params.filter             = BME680_FILTER_SIZE_3;     
-    // my_params.gas_measure        = BME680_ENABLE_GAS_MEAS;   
-    // my_params.heater_dur         = 320;                      
-    // my_params.heater_temp        = 150;                      
-    // my_params.settings           = BME680_OST_SEL;
-    // my_params.intf.i2c.dev   = BME680_PARAM_I2C_DEV;
-    // my_params.intf.i2c.addr  = BME680_PARAM_I2C_ADDR;
+    /* Name of the topic */
+    char topic[32];
+    sprintf(topic, "sensor/bme680_{{ id[loop.index0] }}");
+    
+    bme680_t dev[BME680_NUMOF];
+    bme680_params_t myparams[BME680_NUMOF];
+    memcpy(&myparams, &bme680_params, sizeof(bme680_params_t));
 
-    /* Initialize BME680 sensor */
-    return bme680_init(dev, &my_params);
-}
+    for (unsigned i = 0; i < BME680_NUMOF; i++) 
+    {
+        BME680_SENSOR(&dev[i]).amb_temp = 25;
 
-/*
- * Function that triggers and returns bme680 sensor measurement
- */
-static char *gen_sensor_values(bme680_t dev)
-{
-    if ( bme680_force_measurement(&dev) == 0)
-        printf("TPHG measurement started successfully\n");
-    else {
-        printf("Failed to start TPHG measurement\n");
-        return "1";
+        myparams[i].intf.i2c.addr = 0x{{ args[loop.index0]["slave_address"] }};
+
+        printf("Initialize BME680 sensor %u ... ", i);
+        if (bme680_init(&dev[i], &myparams[i]) != BME680_OK)
+            puts("failed");
+        else
+            puts("OK");
     }
 
-    bme680_field_data_t data;
-    int get_data_return = bme680_get_data(&dev, &data);
+    while (1)
+    {
+        struct bme680_field_data data;
 
-    if ( get_data_return < 0 ) {
-        printf("Error: No valid measurement is available\n");
-        return (char*)get_data_return;
-    }else {
-        printf("BME680 values - Temperature: %.1f C\n", (float)data.temperature);
+        for (unsigned i = 0; i < BME680_NUMOF; i++) 
+        {
+            /* trigger one measuerment */
+            bme680_force_measurement(&dev[i]);
+            /* get the duration for the measurement */
+            int duration = bme680_get_duration(&dev[i]);
+            /* wait for the duration */
+            xtimer_msleep(duration);
+            /* read the data */
+            int res = bme680_get_data(&dev[i], &data);
 
-        char *output = malloc(128);
-        sprintf(output, "[Temperature]: %.1f C\n", (float)data.temperature);
+            if (res == 0 && dev[i].sensor.new_fields) 
+            {
+                /* Allocate memory for the message to be published */
+                char *msg = malloc(128);
 
-        return output;
+                /* Create a message to be published */
+                sprintf(msg, "{id: {{ id[loop.index0] }}, BME680 Output: ");
+#ifndef MODULE_BME680_FP
+                sprintf(msg + strlen(msg), 
+                        "[Temp] = %02d.%02d C, "
+                        "[Pressure] = %" PRIu32 " Pa, "
+                        "[Humidity] = %02" PRIu32 ".%03" PRIu32 " %%",
+                        data.temperature / 100, data.temperature % 100,
+                        data.pressure, data.humidity / 1000, data.humidity % 1000);
+                
+                /* Avoid using measurements from an unstable heating setup */
+                if (data.status & BME680_GASM_VALID_MSK) 
+                    sprintf(msg + strlen(msg),
+                            ", [Gas] = %" PRIu32 " ohms", data.gas_resistance);
+#else
+                sprintf(msg + strlen(msg), 
+                        "[Temp] = %.2f C, "
+                        "[Pressure] = %.2f Pa, "
+                        "[Humidity] %.3f %%",
+                        data.temperature, data.pressure, data.humidity);
+
+                /* Avoid using measurements from an unstable heating setup */
+                if (data.status & BME680_GASM_VALID_MSK) 
+                    sprintf(msg + strlen(msg),
+                            ", [Gas] = %.0f ohms", data.gas_resistance);
+#endif
+                sprintf(msg + strlen(msg), "}\n");
+
+                printf("%s", msg);                
+                
+                /* Publish to the topic */
+                pub(topic, msg, 0);
+            }
+            else if (res == 0)
+                printf("[bme680]: no new data\n");
+            else 
+                printf("[bme680]: read data failed with reason %d\n", res);
+        }
+
+        /* Sleep for 1/{{ frequency[loop.index0] }} seconds */
+        xtimer_sleep( 1 / {{ frequency[loop.index0] }} );
     }
+
+    return NULL;
 }
