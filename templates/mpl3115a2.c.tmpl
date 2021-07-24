@@ -6,6 +6,9 @@ void *send_mpl3115a2(void *arg)
     char topic[32];
     sprintf(topic, "sensor/mpl3115a2_{{ id[loop.index0] }}");
 
+    /* Allocate memory for the message to be published */
+    char *msg = malloc(128);
+
     /* Initialize the sensor*/
     mpl3115a2_t dev;
     int init = mpl3115a2_init(&dev, &mpl3115a2_params[0]);
@@ -19,7 +22,7 @@ void *send_mpl3115a2(void *arg)
         printf("Failed to activate measurement\n");
 
     /* Print sensor output with frequency {{ frequency[loop.index0] }} Hz */
-    while(true)
+    while (true)
     {
         uint32_t pressure;
         int16_t temp;
@@ -31,10 +34,7 @@ void *send_mpl3115a2(void *arg)
             puts("Error: Failed to read values!");
         }
         else
-        {            
-            /* Allocate memory for the message to be published */
-            char *msg = malloc(128);
-
+        {
             /* Create a message to be published */
             sprintf(msg, "{id: {{ id[loop.index0] }}, MPL3115A2 Output: [Pressure]: %u Pa, "
                          "[Temperature]: %3d.%d C, [State]: %#02x}\n",
@@ -46,8 +46,8 @@ void *send_mpl3115a2(void *arg)
             pub(topic, msg, 0);
         }
 
-        /* Sleep for 1/{{ frequency[loop.index0] }} seconds */
-        xtimer_sleep( 1 / {{ frequency[loop.index0] }} );
+        /* Sleep for {{ 1/frequency[loop.index0] }} seconds */
+        xtimer_msleep( 1000 / {{ frequency[loop.index0] }} );
     }
 
     return NULL;

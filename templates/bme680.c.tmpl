@@ -5,6 +5,9 @@ void *send_bme680(void *arg)
     /* Name of the topic */
     char topic[32];
     sprintf(topic, "sensor/bme680_{{ id[loop.index0] }}");
+
+    /* Allocate memory for the message to be published */
+    char *msg = malloc(128);
     
     bme680_t dev[BME680_NUMOF];
     bme680_params_t myparams[BME680_NUMOF];
@@ -23,7 +26,8 @@ void *send_bme680(void *arg)
             puts("OK");
     }
 
-    while (1)
+    /* Print sensor output with frequency {{ frequency[loop.index0] }} Hz */
+    while (true)
     {
         struct bme680_field_data data;
 
@@ -40,9 +44,6 @@ void *send_bme680(void *arg)
 
             if (res == 0 && dev[i].sensor.new_fields) 
             {
-                /* Allocate memory for the message to be published */
-                char *msg = malloc(128);
-
                 /* Create a message to be published */
                 sprintf(msg, "{id: {{ id[loop.index0] }}, BME680 Output: ");
 #ifndef MODULE_BME680_FP
@@ -82,8 +83,8 @@ void *send_bme680(void *arg)
                 printf("[bme680]: read data failed with reason %d\n", res);
         }
 
-        /* Sleep for 1/{{ frequency[loop.index0] }} seconds */
-        xtimer_sleep( 1 / {{ frequency[loop.index0] }} );
+        /* Sleep for {{ 1/frequency[loop.index0] }} seconds */
+        xtimer_msleep( 1000 / {{ frequency[loop.index0] }} );
     }
 
     return NULL;
