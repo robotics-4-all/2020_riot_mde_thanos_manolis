@@ -1,0 +1,61 @@
+void *receive_ws281x(void *arg)
+{
+    (void) arg;
+
+    /* Name of the topic */
+    char topic[32];
+    sprintf(topic, "actuator/ws281x_{{ id[loop.index0] }}");
+
+    /* Allocate memory for the message parsed from topic */
+    char *msg = malloc(128);
+    msg = "00FFFF";
+
+    /* Array to store splitted RGB values (as strings) */
+    char **rgb_str = malloc(3 * sizeof(char*));
+    for (int i = 0; i < 3; i++)
+        rgb_str[i] = malloc(2 * sizeof(char));
+
+    /* Array to store splitted RGB values (as integers) */
+    int *rgb = malloc(3 * sizeof(int));
+
+    ws281x_t dev;
+    ws281x_params_t my_params;
+    memcpy(&my_params, ws281x_params, sizeof(ws281x_params_t));
+    int init;
+
+    /* Connected input pin */
+    my_params.pin = GPIO_PIN( 0, {{args[loop.index0]["data_in"]}} );
+
+    /* Number of LEDs to light up */
+    my_params.numof = 12U;
+
+    uint8_t buf[my_params.numof * WS281X_BYTES_PER_DEVICE];
+    my_params.buf = buf;
+    
+    if ( (init = ws281x_init(&dev, &my_params)) != 0 )
+        printf("WS281X initialization failed with error code %d\n", init);
+    else
+        printf("WS281X actuator initialized\n");
+
+    while (true) 
+    {
+        /* Split message to RGB */
+        for (int i = 0; i < 3; i++)
+        {
+            memcpy( rgb_str[i], &msg[2*i], 2 );
+            rgb[i] = (int)strtol(rgb_str[i], NULL, 16);
+        }
+        
+        /* Store RGB values in a data structure */
+        color_rgb_t colors = { .r = rgb[0], .g = rgb[1], .b = rgb[2] };
+
+        for (uint16_t i = 0; i < dev.params.numof; i++) 
+            ws281x_set(&dev, i, colors);
+
+        ws281x_write(&dev);
+
+        xtimer_msleep( 1000 / 1 );
+    }
+
+    return NULL;
+}

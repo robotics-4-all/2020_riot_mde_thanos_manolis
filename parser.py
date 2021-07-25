@@ -33,25 +33,6 @@ def main():
     board_conf = args[0]
     connection_conf = args[1]
 
-    """ Parse info from device meta-model """
-
-    # Get meta-model from language description
-    devices_mm = metamodel_from_file('meta-models/devices.tx')
-
-    # Export meta-model to PlantUML (.pu) and then png
-    # metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.pu', renderer=PlantUmlRenderer())
-    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/devices_mm.pu')
-
-    # Construct device model from a specific file
-    device_model = devices_mm.model_from_file(
-        'meta-models/example_confs/' + board_conf + '.hwd')
-
-    # Export model to dot and png
-    # model_export(device_model, 'meta-models/dotexport/' + board_conf + '.dot')
-    # (graph,) = pydot.graph_from_dot_file(
-    #     'meta-models/dotexport/' + board_conf + '.dot')
-    # graph.write_png('meta-models/dotexport/' + board_conf + '.png')
-
     """ Parse info from connections meta-model """
 
     # Get meta-model from language description
@@ -69,6 +50,30 @@ def main():
     model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
     os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
 
+    """ Parse info from device meta-model """
+
+    # Get meta-model from language description
+    devices_mm = metamodel_from_file('meta-models/devices.tx')
+
+    # Export meta-model to PlantUML (.pu) and then png
+    # metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.pu', renderer=PlantUmlRenderer())
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/devices_mm.pu')
+
+    device_models = {}
+
+    # Create a model for each device used (board/peripheral)
+    for device in connection_model.includes:
+
+        # Construct device model from a specific file
+        device_models[device.val] = devices_mm.model_from_file(
+            'meta-models/example_confs/' + device.val + '.hwd')
+
+        # Export model to dot and png
+        # model_export(device_model, 'meta-models/dotexport/' + board_conf + '.dot')
+        # (graph,) = pydot.graph_from_dot_file(
+        #     'meta-models/dotexport/' + board_conf + '.dot')
+        # graph.write_png('meta-models/dotexport/' + board_conf + '.png')
+
     """ Produce source code from templates """
 
     # Load C template
@@ -80,6 +85,7 @@ def main():
         'templates/Makefile.tmpl')
     
     peripheral_name_tmp = {}
+    peripheral_type_tmp = {}
     id_tmp = {}
     frequency_tmp = {}
     module_tmp = {}
@@ -93,37 +99,52 @@ def main():
         id_tmp[i] = i + 1
         mqtt_port = connection_model.connections[i].com_endpoint.port
         peripheral_name_tmp[i] = connection_model.connections[i].peripheral.device
+        peripheral_type_tmp[peripheral_name_tmp[i]] = device_models[peripheral_name_tmp[i]].type.val
         module_tmp[i] = connection_model.connections[i].peripheral.device
 
-        # Publishing frequency (always convert to Hz)
-        frequency_tmp[i] = connection_model.connections[i].com_endpoint.freq.val
-        frequency_unit = connection_model.connections[i].com_endpoint.freq.unit
-        if (frequency_unit == "khz"):
-            frequency_tmp[i] = (10**3) * frequency_tmp[i]
-        elif (frequency_unit == "mhz"):
-            frequency_tmp[i] = (10**6) * frequency_tmp[i]
-        elif (frequency_unit == "ghz"):
-            frequency_tmp[i] = (10**9) * frequency_tmp[i]
+        # Publishing frequency (always convert to Hz) 
+        # If not given, default value is 1Hz
+        if( hasattr(connection_model.connections[i].com_endpoint.freq, 'val') ):
+            frequency_tmp[i] = connection_model.connections[i].com_endpoint.freq.val
+            frequency_unit = connection_model.connections[i].com_endpoint.freq.unit
+            if (frequency_unit == "khz"):
+                frequency_tmp[i] = (10**3) * frequency_tmp[i]
+            elif (frequency_unit == "mhz"):
+                frequency_tmp[i] = (10**6) * frequency_tmp[i]
+            elif (frequency_unit == "ghz"):
+                frequency_tmp[i] = (10**9) * frequency_tmp[i]
+        else:
+            frequency_tmp[i] = 1
 
         # Hardware connection args
         args_tmp[i] = {}
 
         if (connection_model.connections[i].hw_conns[0].type == 'gpio'):
-            args_tmp[i]["echo_pin"] = (connection_model.connections[i].hw_conns[0].board_int).split("_",1)[1]
-            args_tmp[i]["trigger_pin"] = (connection_model.connections[i].hw_conns[1].board_int).split("_",1)[1]
+            for hw_conn in connection_model.connections[i].hw_conns:
+                args_tmp[i][hw_conn.peripheral_int] = (hw_conn.board_int).split("_",1)[1]
         elif (connection_model.connections[i].hw_conns[0].type == 'i2c'):
+            args_tmp[i]["sda"] = (connection_model.connections[i].hw_conns[0].board_int[0]).split("_",1)[1]
+            args_tmp[i]["scl"] = (connection_model.connections[i].hw_conns[0].board_int[1]).split("_",1)[1]
             args_tmp[i]["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
             if(connection_model.connections[i].peripheral.device == 'bme680'):
                 module_tmp[i] = module_tmp[i] + '_i2c'
 
-    # Create folder for this connection's source code
-    # Path("codegen/" + connection_conf).mkdir(parents=True, exist_ok=True)
+    # Check if a template exists for each given peripheral
+    all_exist = True
+    for peripheral in peripheral_name_tmp.values():
+        if os.path.isfile('templates/' + peripheral + '.c.tmpl') == False:
+            print("No template for peripheral " + peripheral + " found!")
+            all_exist = False
+    
+    if all_exist == False:
+        sys.exit("You need to create template(s) for the peripherals mentioned above ...")
 
     # C template
     rt = template1.render(address=address_tmp,
                             id=id_tmp,
                             port=mqtt_port,
                             peripheral_name=peripheral_name_tmp,
+                            peripheral_type=peripheral_type_tmp,
                             args=args_tmp,
                             frequency=frequency_tmp,
                             num_of_peripherals = num_of_peripherals_tmp)        

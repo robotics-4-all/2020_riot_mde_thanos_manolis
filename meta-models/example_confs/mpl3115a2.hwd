@@ -9,7 +9,7 @@ peripheral:
 	- power:
 	    name: vcc
 	    number: 1
-	    type: 3.3v
+	    type: 3v3
     - power:
 	    name: gnd
 	    number: 2

@@ -101,11 +101,12 @@ def generate_plantuml_connections(model, filename):
             '  {\n  msg_entries: list=[' + msg_entries + ']' + '\n}\n\n\n'
         f.write(tmp)
 
-        tmp = 'class connections.FREQUENCY_' + str(i) + \
-            '  {\n  val: int=' + str(model.connections[i].com_endpoint.freq.val) + '\n' + \
-            '  unit: str=\'' + model.connections[i].com_endpoint.freq.unit + \
-            '\'\n}\n\n\n'
-        f.write(tmp)
+        if( hasattr(model.connections[i].com_endpoint.freq, 'val') ):
+            tmp = 'class connections.FREQUENCY_' + str(i) + \
+                '  {\n  val: int=' + str(model.connections[i].com_endpoint.freq.val) + '\n' + \
+                '  unit: str=\'' + model.connections[i].com_endpoint.freq.unit + \
+                '\'\n}\n\n\n'
+            f.write(tmp)
 
     # Relations 
 
@@ -163,9 +164,10 @@ def generate_plantuml_connections(model, filename):
             ' *-- "msg" connections.MSG_ENTRIES_' + str(i) + '\n'
         f.write(tmp)
 
-        tmp = 'connections.COM_ENDPOINT_' + str(i) + \
-            ' *-- "freq" connections.FREQUENCY_' + str(i) + '\n'
-        f.write(tmp)
+        if( hasattr(model.connections[i].com_endpoint.freq, 'val') ):
+            tmp = 'connections.COM_ENDPOINT_' + str(i) + \
+                ' *-- "freq" connections.FREQUENCY_' + str(i) + '\n'
+            f.write(tmp)
 
     f.write('\n@enduml')
 

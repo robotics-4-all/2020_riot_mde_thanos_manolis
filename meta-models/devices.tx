@@ -41,7 +41,7 @@ PERIPHERAL_NAME:
 ;
 
 PERIPHERAL_NAMES:
-	"srf04" | "bme680" | "mpl3115a2"
+	"srf04" | "bme680" | "mpl3115a2" | "ws281x"
 ;
 
 PERIPHERAL_TYPE:

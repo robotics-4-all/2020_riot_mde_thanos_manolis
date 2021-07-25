@@ -13,8 +13,8 @@ void *send_srf04(void *arg)
     srf04_params_t my_params;
 
     /* PINS */
-    my_params.trigger = GPIO_PIN( 0, {{args[loop.index0]["trigger_pin"]}} );
-    my_params.echo = GPIO_PIN( 0, {{args[loop.index0]["echo_pin"]}} );
+    my_params.trigger = GPIO_PIN( 0, {{args[loop.index0]["trigger"]}} );
+    my_params.echo = GPIO_PIN( 0, {{args[loop.index0]["echo"]}} );
 
     /* Initialize gpio and interrupt */
     srf04_t dev;

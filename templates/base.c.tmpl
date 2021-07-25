@@ -1,7 +1,3 @@
-/*
- * Publisher node
- */
-
 #include <time.h>
 #include "shell.h"
 #include "msg.h"
@@ -10,11 +6,9 @@
 #include "string.h"
 
 /* Peripheral includes */
-{%- for name in peripheral_name.values() -%}
-{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" %}
+{%- for name in peripheral_name.values() %}
 #include "{{ name }}.h"
 #include "{{ name }}_params.h"
-{%- endif %}
 {%- endfor %}
 
 /* MQTT-S includes */
@@ -43,14 +37,14 @@ char stack_mqtt[THREAD_STACKSIZE_DEFAULT];
 {% include 'templates/mqtt_con.c.tmpl' %}
 
 {% for name in peripheral_name.values() %}
-{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" %}
+{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" or name == "ws281x" %}
 /*
- * [ {{name}} sensor ] 
+ * [ {{name}} {{peripheral_type[name]}} ] 
  * This function gets a sensor measurement with frequency {{ frequency[loop.index0] }} Hz 
  * and publishes it to topic 'sensor/{{ name }}_{{ id[loop.index0] }}'.
  */
 {% include "templates/" + name + ".c.tmpl" %}
-{%- else %}
+{% else -%}
 /*
  * This peripheral is not supported. Therefore, its configuration function
  * is yet to be implemented. This function should first initialize the 
@@ -60,15 +54,12 @@ char stack_mqtt[THREAD_STACKSIZE_DEFAULT];
 // {
 //     ; // You need to fill this function
 // }
-{% endif %}
-{%- endfor %}
+{% endif -%}
+{% endfor %}
 
 int main(void)
 {
     printf("This application runs on %s\n", RIOT_BOARD);
-
-    /* The main thread needs a msg queue to be able to run `ping6` */
-    msg_init_queue(queue, ARRAY_SIZE(queue));
 
     // /* Initialize our subscription buffers */
     // memset(subscriptions, 0, (NUMOFSUBS * sizeof(emcute_sub_t)));
@@ -89,9 +80,12 @@ int main(void)
     thread_create(stack{{ id[loop.index0] }}, sizeof(stack{{ id[loop.index0] }}),
                   THREAD_PRIORITY_MAIN - 1,
                   THREAD_CREATE_STACKTEST,
+                  {% if peripheral_type[name] == "sensor" %}
                   send_{{ name }},
+                  {% else %}
+                  receive_{{ name }},
+                  {% endif %}
                   NULL, "{{ name }}");
-
     {% endfor -%}
 
     return 0;
