@@ -106,3 +106,31 @@ int pub(char *topic, char *data, int qos)
 
     return 0;
 }
+
+int sub(char *topic, int qos, void *func)
+{
+    unsigned flags = EMCUTE_QOS_0;
+
+    /* parse QoS level */
+    flags |= get_qos(qos);
+
+    /* find empty subscription slot */
+    unsigned i = 0;
+    for (; (i < NUMOFSUBS) && (subscriptions[i].topic.id != 0); i++) {}
+    if (i == NUMOFSUBS) 
+    {
+        puts("error: no memory to store new subscriptions");
+        return 1;
+    }
+
+    subscriptions[i].cb = func;
+    strcpy(topics[i], topic);
+    subscriptions[i].topic.name = topics[i];
+    if (emcute_sub(&subscriptions[i], flags) != EMCUTE_OK) {
+        printf("error: unable to subscribe to %s\n", topic);
+        return 1;
+    }
+
+    printf("Now subscribed to %s\n", topic);
+    return 0;
+}
