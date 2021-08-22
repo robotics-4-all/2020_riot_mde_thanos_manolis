@@ -15,7 +15,7 @@ connection:
 	- gpio: p_14 -- echo
 	- gpio: p_13 -- trigger
     communication_endpoint:
-	topic: sonar.distance
+	topic: srf04.distance
 	wifi_ssid: Wifi_2.4GHz
 	wifi_passwd: okodikos?
 	address: 2a02:587:541f:44b6:a15:779:2a6e:f525
@@ -36,7 +36,7 @@ connection:
 	 	scl: p_22 -- scl
 		slave_address: 0x76
     communication_endpoint:
-	topic: bme.data
+	topic: bme680.data
 	wifi_ssid: Wifi_2.4GHz
 	wifi_passwd: okodikos?
 	address: 2a02:587:541f:44b6:a15:779:2a6e:f525

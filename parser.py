@@ -8,7 +8,6 @@ from textx import metamodel_from_file
 
 # PlantUML Imports
 import model_2_plantuml
-import model_2_plantuml1
 
 # Jinja imports
 import codecs
@@ -47,7 +46,7 @@ def main():
         'meta-models/example_confs/' + connection_conf + '.con')
 
     # Export model to PlantUML (.pu) and then png
-    model_2_plantuml1.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
+    model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
     os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
 
     """ Parse info from device meta-model """
@@ -90,6 +89,7 @@ def main():
     frequency_tmp = {}
     module_tmp = {}
     args_tmp = {}
+    topic_tmp = {}
     num_of_peripherals_tmp = len(connection_model.connections)
     
     # Name of board
@@ -112,6 +112,7 @@ def main():
         peripheral_name_tmp[i] = connection_model.connections[i].peripheral.device
         peripheral_type_tmp[peripheral_name_tmp[i]] = device_models[peripheral_name_tmp[i]].type.val
         module_tmp[i] = connection_model.connections[i].peripheral.device
+        topic_tmp[i] = connection_model.connections[i].com_endpoint.topic[:-1]
 
         # Publishing frequency (always convert to Hz) 
         # If not given, default value is 1Hz
@@ -157,6 +158,7 @@ def main():
                             peripheral_name=peripheral_name_tmp,
                             peripheral_type=peripheral_type_tmp,
                             args=args_tmp,
+                            topic=topic_tmp,
                             frequency=frequency_tmp,
                             num_of_peripherals = num_of_peripherals_tmp)        
     ofh = codecs.open("codegen/" + connection_conf + ".c", "w", encoding="utf-8")

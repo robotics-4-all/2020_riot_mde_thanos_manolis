@@ -4,7 +4,7 @@ void *send_bme680(void *arg)
 
     /* Name of the topic */
     char topic[32];
-    sprintf(topic, "sensor/bme680_{{ id[loop.index0] }}");
+    sprintf(topic, "{{topic[loop.index0]}}");
 
     /* Allocate memory for the message to be published */
     char *msg = malloc(128);
