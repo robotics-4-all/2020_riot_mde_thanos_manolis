@@ -1,8 +1,8 @@
 # name of your application
-APPLICATION = {{connection_conf}}
+APPLICATION = {{ connection_conf }}
 
 # If no BOARD is found in the environment, use this default:
-BOARD ?= native
+BOARD ?= {{ board_name }}
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(HOME)/RIOT
@@ -39,6 +39,11 @@ USEMODULE += ps
 USEMODULE += gnrc_icmpv6_echo
 # Optimize network stack to for use with a single network interface
 USEMODULE += gnrc_netif_single
+
+# Connect board to wifi
+USEMODULE += esp_wifi
+CFLAGS += -DESP_WIFI_SSID=\"{{wifi_ssid}}\"
+CFLAGS += -DESP_WIFI_PASS=\"{{wifi_passwd}}\"
 
 # Allow for env-var-based override of the nodes name (EMCUTE_ID)
 ifneq (,$(EMCUTE_ID))

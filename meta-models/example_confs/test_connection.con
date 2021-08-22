@@ -16,7 +16,9 @@ connection:
 	- gpio: p_13 -- trigger
     communication_endpoint:
 	topic: sonar.distance
-	address: 2a02:587:180e:ac1c:2e33:7aff:fefb:d97f
+	wifi_ssid: Wifi_2.4GHz
+	wifi_passwd: okodikos?
+	address: 2a02:587:541f:44b6:a15:779:2a6e:f525
 	port: 1885
 	msg: Distance
 	frequency: 5 hz
@@ -35,7 +37,9 @@ connection:
 		slave_address: 0x76
     communication_endpoint:
 	topic: bme.data
-	address: 2a02:587:180e:ac1c:2e33:7aff:fefb:d97f
+	wifi_ssid: Wifi_2.4GHz
+	wifi_passwd: okodikos?
+	address: 2a02:587:541f:44b6:a15:779:2a6e:f525
 	port: 1885
 	msg: Env
 	frequency: 2 hz
@@ -54,7 +58,9 @@ connection:
 		slave_address: 0x60
     communication_endpoint:
 	topic: mpl3115a2.data
-	address: 2a02:587:180e:ac1c:2e33:7aff:fefb:d97f
+	wifi_ssid: Wifi_2.4GHz
+	wifi_passwd: okodikos?
+	address: 2a02:587:541f:44b6:a15:779:2a6e:f525
 	port: 1885
 	msg: Env
 	frequency: 2 hz
@@ -70,6 +76,8 @@ connection:
 	- gpio: p_0 -- data_in
     communication_endpoint:
 	topic: ws281x.data
-	address: 2a02:587:180e:ac1c:2e33:7aff:fefb:d97f
+	wifi_ssid: Wifi_2.4GHz
+	wifi_passwd: okodikos?
+	address: 2a02:587:541f:44b6:a15:779:2a6e:f525
 	port: 1885
 	msg: Leds_Controller

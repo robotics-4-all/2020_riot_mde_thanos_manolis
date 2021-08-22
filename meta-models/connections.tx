@@ -79,6 +79,8 @@ UART:
 
 COM_ENDPOINT:
 	(("topic:" topic=NEW_ID)
+	 ("wifi_ssid:" wifi_ssid=NEW_ID)
+	 ("wifi_passwd:" wifi_passwd=NEW_ID)
 	 ("address:" addr=ADDRESS_ID)
 	 ("port:" port=INT)
 	 ("msg:" msg=MSG_ENTRIES)

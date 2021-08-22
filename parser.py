@@ -8,6 +8,7 @@ from textx import metamodel_from_file
 
 # PlantUML Imports
 import model_2_plantuml
+import model_2_plantuml1
 
 # Jinja imports
 import codecs
@@ -30,8 +31,7 @@ env = jinja2.Environment(loader=fsloader)
 def main():
     # The 2 given arguments are the configuration files for device and connection model
     args = sys.argv[1:]
-    board_conf = args[0]
-    connection_conf = args[1]
+    connection_conf = args[0]
 
     """ Parse info from connections meta-model """
 
@@ -47,7 +47,7 @@ def main():
         'meta-models/example_confs/' + connection_conf + '.con')
 
     # Export model to PlantUML (.pu) and then png
-    model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
+    model_2_plantuml1.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
     os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
 
     """ Parse info from device meta-model """
@@ -91,6 +91,17 @@ def main():
     module_tmp = {}
     args_tmp = {}
     num_of_peripherals_tmp = len(connection_model.connections)
+    
+    # Name of board
+    board_name_tmp = connection_model.connections[0].board.device
+    if board_name_tmp == 'esp32_wroom_32':
+        board_name_tmp = 'esp32-wroom-32'
+    elif board_name_tmp == 'wemos_d1_mini':
+        board_name_tmp = 'esp8266-esp-12x'
+
+    # Wifi credentials
+    wifi_ssid_tmp = connection_model.connections[0].com_endpoint.wifi_ssid[:-1]
+    wifi_passwd_tmp = connection_model.connections[0].com_endpoint.wifi_passwd[:-1]
 
     for i in range(len(connection_model.connections)):
 
@@ -154,7 +165,10 @@ def main():
 
     # Makefile template
     rt = template2.render(connection_conf=connection_conf,
-                          module=module_tmp)
+                          module=module_tmp,
+                          board_name=board_name_tmp,
+                          wifi_ssid=wifi_ssid_tmp,
+                          wifi_passwd=wifi_passwd_tmp)
     ofh = codecs.open("codegen/Makefile", "w", encoding="utf-8")
     ofh.write(rt)
     ofh.close()
