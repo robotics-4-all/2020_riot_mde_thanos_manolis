@@ -149,7 +149,7 @@ def main():
             all_exist = False
     
     if all_exist == False:
-        sys.exit("You need to create template(s) for the peripherals mentioned above ...")
+        sys.exit("You need to create template(s) for the peripheral(s) mentioned above ...")
 
     # C template
     rt = template1.render(address=address_tmp,

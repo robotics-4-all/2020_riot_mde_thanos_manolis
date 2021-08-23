@@ -45,9 +45,7 @@ USEMODULE += esp_wifi
 CFLAGS += -DESP_WIFI_SSID=\"{{wifi_ssid}}\"
 CFLAGS += -DESP_WIFI_PASS=\"{{wifi_passwd}}\"
 
-# Allow for env-var-based override of the nodes name (EMCUTE_ID)
-ifneq (,$(EMCUTE_ID))
-  CFLAGS += -DEMCUTE_ID=\"$(EMCUTE_ID)\"
-endif
+# Give specific ID to this MQTT node
+CFLAGS += -DEMCUTE_ID=\"{{ connection_conf }}\"
 
 include $(RIOTBASE)/Makefile.include
