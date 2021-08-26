@@ -7,7 +7,6 @@ Device:
 Board:
     'board:'
 	((memory=MEMORY)
-	 (timers=TIMERS)
 	 (cpu=CPU)
 	 (pins=PINS)
 	 (vcc=VCC) 
@@ -134,10 +133,6 @@ OUTPUT_PIN:
 	(("name:" name=ID)
 	 ("number:" number=INT)
 	 ("vmax:" vmax=NUMBER)?)#
-;
-
-TIMERS:
-	name="timers" ":" val=INT
 ;
 
 CPU:

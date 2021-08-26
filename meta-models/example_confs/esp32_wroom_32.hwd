@@ -4,7 +4,6 @@ board:
     name: esp32_wroom_32
     vcc: 3.3
     operating_voltage: 3.3
-    timers: 1
     memory:
 	flash: 4 mb
     cpu:

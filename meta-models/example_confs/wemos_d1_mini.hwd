@@ -4,7 +4,6 @@ board:
     name: wemos_d1_mini
     vcc: 3.3
     operating_voltage: 3.3
-    timers: 1
     memory:
 	flash: 16 mb
     cpu:
