@@ -10,7 +10,7 @@ Board:
 	 (cpu=CPU)
 	 (pins=PINS)
 	 (vcc=VCC) 
-	 (name=BOARD_NAME)
+	 (name=NAME)
 	 (op_volt=OP_VOLT)
 	 (network=NETWORK)?
 	 (bluetooth=BLUETOOTH)?)#
@@ -21,26 +21,14 @@ Peripheral:
 	 ((type=PERIPHERAL_TYPE)
 	 (pins=PINS)
 	 (vcc=VCC) 
-	 (name=PERIPHERAL_NAME)
+	 (name=NAME)
 	 (op_volt=OP_VOLT)
 	 (network=NETWORK)?
 	 (bluetooth=BLUETOOTH)?)#
 ;
 
-BOARD_NAME:
-   name="name" ":" val=BOARD_NAMES
-;
-
-BOARD_NAMES:
-	"esp32_wroom_32" | "wemos_d1_mini"
-;
-
-PERIPHERAL_NAME:
-   name="name" ":" val=PERIPHERAL_NAMES
-;
-
-PERIPHERAL_NAMES:
-	"srf04" | "bme680" | "mpl3115a2" | "ws281x"
+NAME:
+   name="name" ":" val=ID
 ;
 
 PERIPHERAL_TYPE:

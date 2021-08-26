@@ -10,14 +10,6 @@ INCLUDE:
 	"include" name=ID
 ;
 
-INCLUDE:
-   "include" val=INCLUDE_TYPES
-;
-
-INCLUDE_TYPES:
-	"esp32_wroom_32" | "wemos_d1_mini" | "srf04" | "bme680" | "mpl3115a2" | "ws281x"
-;
-
 CONNECTION:
 	"connection:"
 	(("name:" name=ID)

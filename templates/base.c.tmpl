@@ -37,7 +37,6 @@ char stack_mqtt[THREAD_STACKSIZE_DEFAULT];
 {% include 'templates/mqtt_con.c.tmpl' %}
 
 {% for name in peripheral_name.values() %}
-{%- if name == "srf04" or name == "bme680" or name == "mpl3115a2" or name == "ws281x" %}
 {% if peripheral_type[name] == "sensor" %}
 /*
  * [ {{name}} {{peripheral_type[name]}} ] 
@@ -52,53 +51,6 @@ char stack_mqtt[THREAD_STACKSIZE_DEFAULT];
  */
 {% endif %}
 {% include "templates/" + name + ".c.tmpl" %}
-{% else -%}
-{% if peripheral_type[name] == "sensor" %}
-/*
- * This peripheral is not supported. Therefore, its configuration function
- * is yet to be implemented. This function should first initialize the 
- * sensor, get a measurement, and then publish it to the broker. 
- */
-void send_{{ name }}(void *arg)
-{
-    (void) arg;
-
-    /* Name of the topic */
-    char topic[32];
-    sprintf(topic, "{{topic[loop.index0]}}");
-
-    /* Allocate memory for the message to be published */
-    char *msg = malloc(128);
-
-    ////////////////////////////////////////////////
-    // You need to fill the rest of this function //
-    ////////////////////////////////////////////////
-
-    return NULL;
-}
-{% elif peripheral_type[name] == "actuator" %}
-/*
- * This peripheral is not supported. Therefore, its configuration function
- * is yet to be implemented. This function should store the published
- * message, initialize the actuator and then act accordingly. 
- */
-void {{ name }}_on_pub(const emcute_topic_t *topic, void *data, size_t len)
-{
-    char *msg = (char *)data;
-
-    printf("### got publication for topic '%s' [%i] ###\n",
-            topic->name, (int)topic->id);
-    for (size_t i = 0; i < len; i++) {
-        printf("%c", msg[i]);
-    }
-    puts("");
-
-    ////////////////////////////////////////////////
-    // You need to fill the rest of this function //
-    ////////////////////////////////////////////////
-}
-{% endif %}
-{% endif -%}
 {% endfor %}
 
 int main(void)

@@ -19,6 +19,7 @@ from pathlib import Path
 import os
 import sys
 import pydot
+import shutil
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
@@ -85,18 +86,33 @@ def main():
     # metamodel_export(devices_mm, 'img_export/devices_mm.pu', renderer=PlantUmlRenderer())
     # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/devices_mm.pu')
 
+    # Check if a hardware configuration file exists for each given board/peripheral
+    all_hwd_exist = True
+    for device in connection_model.includes:
+        # Construct device model from a specific file
+        if device.name in supported_boards:
+            continue
+        elif device.name in supported_peripherals:
+            continue
+        else:
+            print("No configuration file for device " + device.name + " found!")
+            all_hwd_exist = False
+    
+    if all_hwd_exist == False:
+        sys.exit("You need to create configuration (.hwd) file(s) for the devices(s) mentioned above ...")
+
     device_models = {}
 
     # Create a model for each device used (board/peripheral)
     for device in connection_model.includes:
 
         # Construct device model from a specific file
-        if device.val in supported_boards:
-            device_models[device.val] = devices_mm.model_from_file(
-                'supported_devices/boards/' + device.val + '.hwd')
-        elif device.val in supported_peripherals:
-            device_models[device.val] = devices_mm.model_from_file(
-                'supported_devices/peripherals/' + device.val + '.hwd')
+        if device.name in supported_boards:
+            device_models[device.name] = devices_mm.model_from_file(
+                'supported_devices/boards/' + device.name + '.hwd')
+        elif device.name in supported_peripherals:
+            device_models[device.name] = devices_mm.model_from_file(
+                'supported_devices/peripherals/' + device.name + '.hwd')
 
         # Export model to dot and png
         # model_export(device_model, 'img_export/' + board_conf + '.dot')
@@ -173,13 +189,18 @@ def main():
                 module_tmp[i] = module_tmp[i] + '_i2c'
 
     # Check if a template exists for each given peripheral
-    all_exist = True
+    all_tmpl_exist = True
     for peripheral in peripheral_name_tmp.values():
-        if os.path.isfile('templates/' + peripheral + '.c.tmpl') == False:
+        file = 'templates/' + peripheral + '.c.tmpl'
+        if os.path.isfile(file) == False:
             print("No template for peripheral " + peripheral + " found!")
-            all_exist = False
+            all_tmpl_exist = False
+            if peripheral_type_tmp[peripheral] == 'sensor':
+                shutil.copyfile('templates/unsupported_sensor.txt', file)
+            elif peripheral_type_tmp[peripheral] == 'actuator':
+                shutil.copyfile('templates/unsupported_actuator.txt', file)
     
-    if all_exist == False:
+    if all_tmpl_exist == False:
         sys.exit("You need to create template(s) for the peripheral(s) mentioned above ...")
 
     # C template
