@@ -33,25 +33,48 @@ def main():
     args = sys.argv[1:]
     connection_conf = args[0]
 
+    # Create a list of supported boards
+    supported_boards = []
+    directory = os.fsencode('supported_devices/boards')        
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        if filename.endswith(".hwd"): 
+            supported_boards.append(filename[:-4])
+            continue
+        else:
+            continue
+
+    # Create a list of supported peripherals
+    supported_peripherals = []
+    directory = os.fsencode('supported_devices/peripherals')        
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        if filename.endswith(".hwd"): 
+            supported_peripherals.append(filename[:-4])
+            continue
+        else:
+            continue
+
+
     """ Parse info from connections meta-model """
 
     # Get meta-model from language description
     connections_mm = metamodel_from_file('meta-models/connections.tx')
 
     # Export meta-model to PlantUML (.pu) and then png
-    # metamodel_export(connections_mm, 'meta-models/dotexport/connections_mm.pu', renderer=PlantUmlRenderer())
-    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/connections_mm.pu')
+    # metamodel_export(connections_mm, 'img_export/connections_mm.pu', renderer=PlantUmlRenderer())
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/connections_mm.pu')
 
     # Construct connection model from a specific file
     connection_model = connections_mm.model_from_file(
-        'meta-models/example_confs/' + connection_conf + '.con')
+        'test_connections/' + connection_conf + '.con')
 
     # Export model to PlantUML (.pu) and then png
-    # model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
-    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
+    # model_2_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + '.pu')
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + '.pu')
 
-    hw_conns_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
-    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
+    hw_conns_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + '.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + '.pu')
 
     """ Parse info from device meta-model """
 
@@ -59,8 +82,8 @@ def main():
     devices_mm = metamodel_from_file('meta-models/devices.tx')
 
     # Export meta-model to PlantUML (.pu) and then png
-    # metamodel_export(devices_mm, 'meta-models/dotexport/devices_mm.pu', renderer=PlantUmlRenderer())
-    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/devices_mm.pu')
+    # metamodel_export(devices_mm, 'img_export/devices_mm.pu', renderer=PlantUmlRenderer())
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/devices_mm.pu')
 
     device_models = {}
 
@@ -68,14 +91,18 @@ def main():
     for device in connection_model.includes:
 
         # Construct device model from a specific file
-        device_models[device.val] = devices_mm.model_from_file(
-            'meta-models/example_confs/' + device.val + '.hwd')
+        if device.val in supported_boards:
+            device_models[device.val] = devices_mm.model_from_file(
+                'supported_devices/boards/' + device.val + '.hwd')
+        elif device.val in supported_peripherals:
+            device_models[device.val] = devices_mm.model_from_file(
+                'supported_devices/peripherals/' + device.val + '.hwd')
 
         # Export model to dot and png
-        # model_export(device_model, 'meta-models/dotexport/' + board_conf + '.dot')
+        # model_export(device_model, 'img_export/' + board_conf + '.dot')
         # (graph,) = pydot.graph_from_dot_file(
-        #     'meta-models/dotexport/' + board_conf + '.dot')
-        # graph.write_png('meta-models/dotexport/' + board_conf + '.png')
+        #     'img_export/' + board_conf + '.dot')
+        # graph.write_png('img_export/' + board_conf + '.png')
 
     """ Produce source code from templates """
 
