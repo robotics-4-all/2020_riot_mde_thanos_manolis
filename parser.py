@@ -8,6 +8,7 @@ from textx import metamodel_from_file
 
 # PlantUML Imports
 import model_2_plantuml
+import hw_conns_plantuml
 
 # Jinja imports
 import codecs
@@ -46,7 +47,10 @@ def main():
         'meta-models/example_confs/' + connection_conf + '.con')
 
     # Export model to PlantUML (.pu) and then png
-    model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
+    # model_2_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
+
+    hw_conns_plantuml.generate_plantuml_connections(connection_model, 'meta-models/dotexport/' + connection_conf + '.pu')
     os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 meta-models/dotexport/' + connection_conf + '.pu')
 
     """ Parse info from device meta-model """
