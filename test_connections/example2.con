@@ -1,0 +1,23 @@
+include bme280
+include esp32_wroom_32
+
+connection:
+    name: bme280_esp32
+    board: esp32_wroom_32
+    peripheral: bme280
+    power_connections:
+	- gnd_1 -- gnd
+	- power_5v -- vcc 
+    hw_connections:
+	- i2c: 
+		sda: p_21 -- sda
+	 	scl: p_22 -- scl
+		slave_address: 0x76
+    communication_endpoint:
+	topic: bme280.data
+	wifi_ssid: Wifi_2.4GHz
+	wifi_passwd: okodikos?
+	address: 2a02:587:541f:44b6:a15:779:2a6e:f525
+	port: 1885
+	msg: Env
+	frequency: 2 hz

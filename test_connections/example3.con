@@ -1,0 +1,21 @@
+include srf04
+include wemos_d1_mini
+
+connection:
+    name: sonar_esp8266
+    board: wemos_d1_mini
+    peripheral: srf04
+    power_connections:
+	- gnd_1 -- gnd
+	- power_5v -- vcc 
+    hw_connections:
+	- gpio: p_14 -- echo
+	- gpio: p_13 -- trigger
+    communication_endpoint:
+	topic: srf04.data
+	wifi_ssid: Wifi_2.4GHz
+	wifi_passwd: okodikos?
+	address: 2a02:587:541f:44b6:a15:779:2a6e:f525
+	port: 1885
+	msg: Distance
+	frequency: 5 hz

@@ -96,7 +96,7 @@ MSG_TYPES:
 ;
 
 SENSOR:
-	"Distance" | "Temperature" | "Humidity" | "Gas" | "Pressure" | "Env"
+	"Distance" | "Temperature" | "Humidity" | "Gas" | "Pressure" | "Env" | "Acceleration"
 ;
 
 ACTUATOR:

@@ -201,7 +201,8 @@ def main():
                 shutil.copyfile('templates/unsupported_actuator.txt', file)
     
     if all_tmpl_exist == False:
-        sys.exit("You need to create template(s) for the peripheral(s) mentioned above ...")
+        sys.exit('\nA template for each one of the peripheral(s) mentioned above' + \
+                 '\nwas created. You need to fill it with appropriate code ...')
 
     # C template
     rt = template1.render(address=address_tmp,
