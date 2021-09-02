@@ -2,6 +2,7 @@
 
 peripheral:
     name: ws281x
+	riot_name: ws281x
     type: actuator
     operating_voltage: 5
     vcc: 5

@@ -2,6 +2,7 @@
 
 peripheral:
     name: mpl3115a2
+	riot_name: mpl3115a2
     type: sensor
     operating_voltage: 3.3
     vcc: 3.3

@@ -9,38 +9,32 @@ Board:
 	((memory=MEMORY)
 	 (cpu=CPU)
 	 (pins=PINS)
-	 (vcc=VCC) 
-	 (name=NAME)
-	 (op_volt=OP_VOLT)
+	 ("name" ":" name=ID)
+	 ("riot_name" ":" riot_name=NEW_ID)
+	 ("vcc" ":" vcc=FLOAT)
+	 ("operating_voltage" ":" op_volt=FLOAT)
 	 (network=NETWORK)?
 	 (bluetooth=BLUETOOTH)?)#
 ;
 
 Peripheral:
     'peripheral:'
-	 ((type=PERIPHERAL_TYPE)
+	 (("type" ":" type=PERIPHERAL_TYPES)
 	 (pins=PINS)
-	 (vcc=VCC) 
-	 (name=NAME)
-	 (op_volt=OP_VOLT)
+	 ("name" ":" name=ID)
+	 ("riot_name" ":" riot_name=NEW_ID)
+	 ("vcc" ":" vcc=FLOAT)
+	 ("operating_voltage" ":" op_volt=FLOAT)
 	 (network=NETWORK)?
 	 (bluetooth=BLUETOOTH)?)#
 ;
 
-NAME:
-   name="name" ":" val=ID
-;
-
-PERIPHERAL_TYPE:
-	name="type" ":" val=PER_TYPES
-;
-
-PER_TYPES:
+PERIPHERAL_TYPES:
 	"sensor" | "actuator"
 ;
 
 PINS:
-	name="pins" ":" val*=PIN
+	"pins" ":" val*=PIN
 ;
 
 PIN:
@@ -124,92 +118,65 @@ OUTPUT_PIN:
 ;
 
 CPU:
-	name="cpu" ":" val=CPU_TYPE
-;
-
-CPU_TYPE:
+	"cpu" ":"
 	(("cpu_family:" cpu_family=CPU_FAMILY)
 	 ("max_freq:" max_freq=NUMBER unit=FREQ_UNIT)
 	 ("fpu:" fpu=BOOL))#
 ;
+
 
 CPU_FAMILY:
 	( "ESP32" | "ESP8266")
 ;
 
 MEMORY:
-    name="memory" ":" val=MEM_TYPE
-;
-
-MEM_TYPE:
-    (
-    (("ram:" ram=MEM_VALUE)
-    ("rom:" rom=MEM_VALUE)?
-    ("flash:" flash=MEM_VALUE)?)# |
-    (("ram:" ram=MEM_VALUE)?
-    ("rom:" rom=MEM_VALUE)?
-    ("flash:" flash=MEM_VALUE))# |
-    (("ram:" ram=MEM_VALUE)?
-    ("rom:" rom=MEM_VALUE)
-    ("flash:" flash=MEM_VALUE)?)#
+    "memory:"
+	(
+    (("ram:" ram=NUMBER UNITS?)
+    ("rom:" rom=NUMBER UNITS?)?
+    ("flash:" flash=NUMBER UNITS?)?)# |
+    (("ram:" ram=NUMBER UNITS?)?
+    ("rom:" rom=NUMBER UNITS?)?
+    ("flash:" flash=NUMBER UNITS?))# |
+    (("ram:" ram=NUMBER UNITS?)?
+    ("rom:" rom=NUMBER UNITS?)
+    ("flash:" flash=NUMBER UNITS?)?)#
     )
-;
-
-MEM_VALUE:
-    val=NUMBER unit=UNITS?
 ;
 
 UNITS:
     ("kb" | "mb" | "gb" | "b")
 ;
 
-VCC:
-    name="vcc" ":" val=FLOAT
-;
-
-OP_VOLT:
-   name="operating_voltage" ":" val=FLOAT
-;
-
 NETWORK:
-    name="network" ":"
-    val*=NETWORK_TYPE
-;
-
-NETWORK_TYPE:
-    (WIFI | ETHERNET)
+    "network" ":"
+    (WIFI|ETHERNET)
 ;
 
 WIFI:
 	"- wifi:" 
 	(("name:" name=ID)
-	 ("freq:" freq*=NUMBER[","] unit=FREQ_UNIT)?)#
+	 ("freq:" freq=NUMBER FREQ_UNIT)?)#
 ;
 
 FREQ_UNIT:
 	"ghz" | "mhz" | "hz"
 ;
+
 ETHERNET:
 	"- ethernet:"
 	"name:" name=ID
 ;
 
 BLUETOOTH:
-	name="bluetooth" ":" val=BLUETOOTH_VAL
-;
-
-BLUETOOTH_VAL:
+	"bluetooth" ":" 
 	"version:" version=NUMBER
-;
-
-ATTRIBUTE:
-    name=ID ":" val=VAL_TYPE
-;
-
-VAL_TYPE:
-    NUMBER | ID
 ;
 
 Comment:
   /\/\/.*$/
+;
+
+NEW_ID:
+	/(.*?)\n/
 ;

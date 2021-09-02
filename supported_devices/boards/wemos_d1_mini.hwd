@@ -2,6 +2,7 @@
 
 board:
     name: wemos_d1_mini
+	riot_name: esp8266-esp-12x
     vcc: 3.3
     operating_voltage: 3.3
     memory:

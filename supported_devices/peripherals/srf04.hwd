@@ -2,6 +2,7 @@
 
 peripheral:
     name: srf04
+	riot_name: srf04
     type: sensor
     operating_voltage: 5
     vcc: 5

@@ -157,7 +157,7 @@ def main():
         id_tmp[i] = i + 1
         mqtt_port = connection_model.connections[i].com_endpoint.port
         peripheral_name_tmp[i] = connection_model.connections[i].peripheral.device
-        peripheral_type_tmp[peripheral_name_tmp[i]] = device_models[peripheral_name_tmp[i]].type.val
+        peripheral_type_tmp[peripheral_name_tmp[i]] = device_models[peripheral_name_tmp[i]].type
         module_tmp[i] = connection_model.connections[i].peripheral.device
         topic_tmp[i] = connection_model.connections[i].com_endpoint.topic[:-1]
 
