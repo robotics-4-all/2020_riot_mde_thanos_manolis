@@ -8,7 +8,7 @@ Board:
     'board:'
 	((memory=MEMORY)
 	 (cpu=CPU)
-	 (pins=PINS)
+	 ("pins" ":" val*=PIN)
 	 ("name" ":" name=ID)
 	 ("riot_name" ":" riot_name=NEW_ID)
 	 ("vcc" ":" vcc=FLOAT)
@@ -19,8 +19,8 @@ Board:
 
 Peripheral:
     'peripheral:'
-	 (("type" ":" type=PERIPHERAL_TYPES)
-	 (pins=PINS)
+	 (("type" ":" type=PER_TYPES)
+	 ("pins" ":" val*=PIN)
 	 ("name" ":" name=ID)
 	 ("riot_name" ":" riot_name=NEW_ID)
 	 ("vcc" ":" vcc=FLOAT)
@@ -29,12 +29,8 @@ Peripheral:
 	 (bluetooth=BLUETOOTH)?)#
 ;
 
-PERIPHERAL_TYPES:
+PER_TYPES:
 	"sensor" | "actuator"
-;
-
-PINS:
-	"pins" ":" val*=PIN
 ;
 
 PIN:
