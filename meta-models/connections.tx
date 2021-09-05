@@ -33,16 +33,11 @@ POWER_CONNECTION:
 ;
 
 HW_CONNECTION:
-	GPIO | I2C | SPI | PWM | UART
+	GPIO | I2C | SPI | UART
 ;
 
 GPIO:
 	"-" type="gpio" ":" board_int=ID "--" peripheral_int=ID
-;
-
-PWM:
-	"-" type="pwm" ":" board_int=ID "--" peripheral_int=ID
-	"frequency:" frequency=FREQUENCY
 ;
 
 FREQUENCY:
@@ -54,7 +49,11 @@ FREQ_UNIT:
 ;
 
 SPI:
-	"-" type="spi" ":" board_int=ID "--" peripheral_int=ID
+	"-" type="spi" ":" 
+	"mosi:" board_int=ID "--" peripheral_int=ID
+	"miso:" board_int=ID "--" peripheral_int=ID
+	"sck:" board_int=ID "--" peripheral_int=ID
+	"cs:" board_int=ID "--" peripheral_int=ID
 ;
 
 I2C:
@@ -65,7 +64,9 @@ I2C:
 ;
 
 UART:
-	"-" type="uart" ":" board_int=ID "--" peripheral_int=ID
+	"-" type="uart" ":"
+	"tx:" board_int=ID "--" peripheral_int=ID
+	"rx:" board_int=ID "--" peripheral_int=ID
 	"baudrate:" baudrate=INT
 ;
 
