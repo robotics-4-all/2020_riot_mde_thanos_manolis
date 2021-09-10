@@ -24,9 +24,7 @@ Peripheral:
 	 ("name" ":" name=ID)
 	 ("riot_name" ":" riot_name=NEW_ID)
 	 ("vcc" ":" vcc=FLOAT)
-	 ("operating_voltage" ":" op_volt=FLOAT)
-	 (network=NETWORK)?
-	 (bluetooth=BLUETOOTH)?)#
+	 ("operating_voltage" ":" op_volt=FLOAT))#
 ;
 
 PER_TYPES:

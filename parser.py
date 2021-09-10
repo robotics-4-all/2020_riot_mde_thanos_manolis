@@ -71,11 +71,11 @@ def main():
         'test_connections/' + connection_conf + '.con')
 
     # Export model to PlantUML (.pu) and then png
-    # model_2_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + '.pu')
-    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + '.pu')
+    hw_conns_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + 'a.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + 'a.pu')
 
-    hw_conns_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + '.pu')
-    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + '.pu')
+    model_2_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + 'b.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + 'b.pu')
 
     """ Parse info from device meta-model """
 

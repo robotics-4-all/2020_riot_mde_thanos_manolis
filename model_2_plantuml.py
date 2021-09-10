@@ -16,7 +16,7 @@ def generate_plantuml_connections(model, filename):
 
     for i in range(len(model.includes)):
         tmp = 'class connections.INCLUDE_' + str(i) + \
-            '  {\n  val: str=\'' + model.includes[i].val + \
+            '  {\n  name: str=\'' + model.includes[i].name + \
             '\'\n}\n\n\n'
         f.write(tmp)
 

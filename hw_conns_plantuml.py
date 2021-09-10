@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-model_2_plantuml.py
+hw_conns_plantuml.py
 Script that generates PlantUML text from textX models
 """
 
