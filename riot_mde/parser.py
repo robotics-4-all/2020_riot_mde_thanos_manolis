@@ -7,8 +7,8 @@ from textx.export import metamodel_export, model_export, PlantUmlRenderer
 from textx import metamodel_from_file
 
 # PlantUML Imports
-import model_2_plantuml
-import hw_conns_plantuml
+from riot_mde import model_2_plantuml
+from riot_mde import hw_conns_plantuml
 
 # Jinja imports
 import codecs
@@ -18,25 +18,39 @@ from os.path import join, dirname
 from pathlib import Path
 import os
 import sys
+import argparse
 import pydot
 import shutil
+
+from riot_mde.definitions import *
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-fsloader = jinja2.FileSystemLoader(currentdir)
+fsloader = jinja2.FileSystemLoader(TEMPLATES)
 env = jinja2.Environment(loader=fsloader)
 
+def parse_args() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+
+    # Add arguments
+    parser.add_argument("--connections",
+                        help="Path to a connection specification.")
+
+    return parser.parse_args()
 
 def main():
-    # The 2 given arguments are the configuration files for device and connection model
-    args = sys.argv[1:]
-    connection_conf = args[0]
+    cl_args = parse_args()
+    connection_conf_filename = cl_args.connections
+    if connection_conf_filename.endswith(".con"): 
+        connection_conf = connection_conf_filename.removesuffix('.con')
+    else:
+        sys.exit("Connection file should end with '.con'")
 
     # Create a list of supported boards
     supported_boards = []
-    directory = os.fsencode('supported_devices/boards')        
+    directory = os.fsencode(SUPPORTED_DEVICES + 'boards')        
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
         if filename.endswith(".hwd"): 
@@ -47,7 +61,7 @@ def main():
 
     # Create a list of supported peripherals
     supported_peripherals = []
-    directory = os.fsencode('supported_devices/peripherals')        
+    directory = os.fsencode(SUPPORTED_DEVICES + 'peripherals')        
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
         if filename.endswith(".hwd"): 
@@ -60,31 +74,31 @@ def main():
     """ Parse info from connections meta-model """
 
     # Get meta-model from language description
-    connections_mm = metamodel_from_file('meta-models/connections.tx')
+    connections_mm = metamodel_from_file(META_MODELS + '/connections.tx')
 
     # Export meta-model to PlantUML (.pu) and then png
-    # metamodel_export(connections_mm, 'img_export/connections_mm.pu', renderer=PlantUmlRenderer())
-    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/connections_mm.pu')
+    # metamodel_export(connections_mm, IMG_EXPORT + 'connections_mm.pu', renderer=PlantUmlRenderer())
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 ' + IMG_EXPORT + 'connections_mm.pu')
 
     # Construct connection model from a specific file
     connection_model = connections_mm.model_from_file(
-        'test_connections/' + connection_conf + '.con')
+        'test_connections/' + connection_conf_filename)
 
     # Export model to PlantUML (.pu) and then png
-    hw_conns_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + 'a.pu')
-    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + 'a.pu')
+    hw_conns_plantuml.generate_plantuml_connections(connection_model, IMG_EXPORT + connection_conf + 'a.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 ' + IMG_EXPORT + connection_conf + 'a.pu')
 
-    model_2_plantuml.generate_plantuml_connections(connection_model, 'img_export/' + connection_conf + 'b.pu')
-    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/' + connection_conf + 'b.pu')
+    model_2_plantuml.generate_plantuml_connections(connection_model, IMG_EXPORT + connection_conf + 'b.pu')
+    os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 ' + IMG_EXPORT + connection_conf + 'b.pu')
 
     """ Parse info from device meta-model """
 
     # Get meta-model from language description
-    devices_mm = metamodel_from_file('meta-models/devices.tx')
+    devices_mm = metamodel_from_file(META_MODELS + '/devices.tx')
 
     # Export meta-model to PlantUML (.pu) and then png
-    # metamodel_export(devices_mm, 'img_export/devices_mm.pu', renderer=PlantUmlRenderer())
-    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 img_export/devices_mm.pu')
+    # metamodel_export(devices_mm, IMG_EXPORT + 'devices_mm.pu', renderer=PlantUmlRenderer())
+    # os.system('plantuml -DPLANTUML_LIMIT_SIZE=8192 ' + IMG_EXPORT + 'devices_mm.pu')
 
     # Check if a hardware configuration file exists for each given board/peripheral
     all_hwd_exist = True
@@ -109,26 +123,26 @@ def main():
         # Construct device model from a specific file
         if device.name in supported_boards:
             device_models[device.name] = devices_mm.model_from_file(
-                'supported_devices/boards/' + device.name + '.hwd')
+                SUPPORTED_DEVICES + '/boards/' + device.name + '.hwd')
         elif device.name in supported_peripherals:
             device_models[device.name] = devices_mm.model_from_file(
-                'supported_devices/peripherals/' + device.name + '.hwd')
+                SUPPORTED_DEVICES + '/peripherals/' + device.name + '.hwd')
 
         # Export model to dot and png
-        # model_export(device_model, 'img_export/' + board_conf + '.dot')
+        # model_export(device_models[device.name], IMG_EXPORT + device.name + '.dot')
         # (graph,) = pydot.graph_from_dot_file(
-        #     'img_export/' + board_conf + '.dot')
-        # graph.write_png('img_export/' + board_conf + '.png')
+        #     IMG_EXPORT + device.name + '.dot')
+        # graph.write_png(IMG_EXPORT + device.name + '.png')
 
     """ Produce source code from templates """
 
     # Load C template
     template1 = env.get_template(
-        'templates/base.c.tmpl')
+        'base.c.tmpl')
 
     # Load Makefile template
     template2 = env.get_template(
-        'templates/Makefile.tmpl')
+        'Makefile.tmpl')
     
     peripheral_name_tmp = {}
     peripheral_type_tmp = {}
@@ -191,14 +205,14 @@ def main():
     # Check if a template exists for each given peripheral
     all_tmpl_exist = True
     for peripheral in peripheral_name_tmp.values():
-        file = 'templates/' + peripheral + '.c.tmpl'
+        file = TEMPLATES + peripheral + '.c.tmpl'
         if os.path.isfile(file) == False:
             print("No template for peripheral " + peripheral + " found!")
             all_tmpl_exist = False
             if peripheral_type_tmp[peripheral] == 'sensor':
-                shutil.copyfile('templates/unsupported_sensor.txt', file)
+                shutil.copyfile(TEMPLATES + 'unsupported_sensor.txt', file)
             elif peripheral_type_tmp[peripheral] == 'actuator':
-                shutil.copyfile('templates/unsupported_actuator.txt', file)
+                shutil.copyfile(TEMPLATES + 'unsupported_actuator.txt', file)
     
     if all_tmpl_exist == False:
         sys.exit('\nA template for each one of the peripheral(s) mentioned above' + \
@@ -213,8 +227,9 @@ def main():
                             args=args_tmp,
                             topic=topic_tmp,
                             frequency=frequency_tmp,
-                            num_of_peripherals = num_of_peripherals_tmp)        
-    ofh = codecs.open("codegen/" + connection_conf + ".c", "w", encoding="utf-8")
+                            num_of_peripherals = num_of_peripherals_tmp,
+                            templates = TEMPLATES)        
+    ofh = codecs.open(CODEGEN + connection_conf + ".c", "w", encoding="utf-8")
     ofh.write(rt)
     ofh.close()
 
@@ -224,7 +239,7 @@ def main():
                           board_name=board_name_tmp,
                           wifi_ssid=wifi_ssid_tmp,
                           wifi_passwd=wifi_passwd_tmp)
-    ofh = codecs.open("codegen/Makefile", "w", encoding="utf-8")
+    ofh = codecs.open(CODEGEN + 'Makefile', "w", encoding="utf-8")
     ofh.write(rt)
     ofh.close()
 
