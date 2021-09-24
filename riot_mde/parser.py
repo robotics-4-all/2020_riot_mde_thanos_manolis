@@ -36,7 +36,7 @@ def parse_args() -> argparse.ArgumentParser:
 
     # Add arguments
     parser.add_argument("--connections",
-                        help="Path to a connection specification.")
+                        help="Filename of a connection specification.")
 
     return parser.parse_args()
 
